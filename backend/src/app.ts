@@ -28,6 +28,10 @@ import docsRoutes from "./docs/router.js";
 export function createApp(): express.Express {
   const app = express();
 
+  // Flat querystrings only (?a=1&b=2). The extended (qs) parser turns
+  // ?status[$ne]=x into operator objects — a NoSQL-injection and DoS
+  // surface this API never needs, since every filter is a plain string.
+  app.set("query parser", "simple");
   app.use(helmet());
   // Local loopback on any port is allowed so the browser can call the API
   // whether the frontend runs on :3000, an auto-bumped :3001, localhost or
