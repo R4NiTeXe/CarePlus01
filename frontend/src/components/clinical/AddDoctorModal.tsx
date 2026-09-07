@@ -171,7 +171,7 @@ export function AddDoctorModal({ open, onClose }: { open: boolean; onClose: () =
                     onClick={() => toggleDay(day)}
                     className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${
                       active
-                        ? "border-[#11507a] bg-[#e3f0f9] text-[#11507a]"
+                        ? "border-[#0B423C] bg-[#E6F3EF] text-[#0B423C]"
                         : "border-input bg-background text-muted-foreground hover:bg-accent"
                     }`}
                   >

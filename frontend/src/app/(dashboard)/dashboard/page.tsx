@@ -91,14 +91,14 @@ export default function DashboardPage() {
           <CardContent className="flex items-center gap-4">
             <svg width="96" height="96" viewBox="0 0 100 100" role="img" aria-label={`Bed occupancy ${occupancy} percent`}>
               <circle cx="50" cy="50" r="44" fill="none" stroke="#e9eef4" strokeWidth="10" />
-              <circle cx="50" cy="50" r="44" fill="none" stroke="#1d6f9c" strokeWidth="10" strokeLinecap="round"
+              <circle cx="50" cy="50" r="44" fill="none" stroke="#0E5B53" strokeWidth="10" strokeLinecap="round"
                 strokeDasharray={circ} strokeDashoffset={circ - (circ * occupancy) / 100} transform="rotate(-90 50 50)" />
-              <text x="50" y="55" textAnchor="middle" fontSize="18" fontWeight="700" fill="#0b2b4a">
+              <text x="50" y="55" textAnchor="middle" fontSize="18" fontWeight="700" fill="#103B36">
                 <AnimatedNumber value={occupancy} format={(n) => `${Math.round(n)}%`} />
               </text>
             </svg>
             <div className="text-sm">
-              <p className="font-bold text-[#0b2b4a] dark:text-foreground">
+              <p className="font-bold text-[#103B36] dark:text-foreground">
                 <AnimatedNumber value={occupied} format={(n) => String(Math.round(n))} />/<AnimatedNumber value={beds.length} format={(n) => String(Math.round(n))} /> beds
               </p>
               <p className="text-muted-foreground">ICU, Emergency, Wards & Suites</p>

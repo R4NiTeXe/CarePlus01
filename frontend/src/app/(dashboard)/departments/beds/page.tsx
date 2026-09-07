@@ -19,7 +19,7 @@ const bedStyle: Record<string, string> = {
   Vacant: "border-green-300 bg-[#e6f5e8] text-[#2e7d32]",
   Occupied: "border-red-300 bg-[#fde8e8] text-[#c62828]",
   Sanitizing: "border-amber-300 bg-[#fef2d6] text-[#965f0e]",
-  Reserved: "border-blue-300 bg-[#e3f0f9] text-[#11507a]",
+  Reserved: "border-teal-300 bg-[#E6F3EF] text-[#0B423C]",
 };
 
 export default function BedBoardPage() {
@@ -121,7 +121,7 @@ export default function BedBoardPage() {
         <span className="rounded-full bg-[#e6f5e8] px-3 py-1 text-[#2e7d32]">Vacant</span>
         <span className="rounded-full bg-[#fde8e8] px-3 py-1 text-[#c62828]">Occupied</span>
         <span className="rounded-full bg-[#fef2d6] px-3 py-1 text-[#965f0e]">Sanitizing</span>
-        <span className="rounded-full bg-[#e3f0f9] px-3 py-1 text-[#11507a]">Reserved</span>
+        <span className="rounded-full bg-[#E6F3EF] px-3 py-1 text-[#0B423C]">Reserved</span>
       </div>
 
       <Dialog open={selected !== null} onOpenChange={(o) => { if (!o) setSelected(null); }}>

@@ -150,7 +150,7 @@ export default function BillingPage() {
           {print && (
             <div className="grid gap-2 text-sm">
               <div className="border-b pb-2 text-center">
-                <p className="text-lg font-bold text-[#0b2b4a]">CarePlus Hospital</p>
+                <p className="text-lg font-bold text-[#103B36]">CarePlus Hospital</p>
                 <p className="text-xs text-muted-foreground">GSTIN 27AABCC1234F1Z5 • Receipt {print.id} • {print.date}</p>
               </div>
               <p><span className="text-muted-foreground">Patient:</span> {print.patientName} ({print.patientId})</p>

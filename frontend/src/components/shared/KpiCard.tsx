@@ -23,7 +23,7 @@ export function KpiCard({
   animateDuration?: number;
 }) {
   const tones: Record<string, string> = {
-    blue: "bg-[#e3f0f9] text-[#11507a]",
+    blue: "bg-[#E6F3EF] text-[#0B423C]",
     green: "bg-[#e6f5e8] text-[#2e7d32]",
     amber: "bg-[#fef2d6] text-[#965f0e]",
     red: "bg-[#fde8e8] text-[#c62828]",
@@ -37,7 +37,7 @@ export function KpiCard({
         </span>
       </CardHeader>
       <CardContent>
-        <p className="text-3xl font-bold tracking-tight text-[#0b2b4a] dark:text-foreground">
+        <p className="text-3xl font-bold tracking-tight text-[#103B36] dark:text-foreground">
           {rawValue !== undefined && formatValue ? (
             <AnimatedNumber
               value={rawValue}

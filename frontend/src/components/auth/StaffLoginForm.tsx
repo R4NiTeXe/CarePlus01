@@ -108,11 +108,11 @@ export function StaffLoginForm({
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0b2b4a] p-4">
+    <div className="flex min-h-screen items-center justify-center bg-[#103B36] p-4">
       <Card className="w-full max-w-md rounded-2xl">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0b2b4a]">
-            <HeartPulse className="h-6 w-6 animate-pulse text-[#4fc3f7]" />
+          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#103B36]">
+            <HeartPulse className="h-6 w-6 animate-pulse text-[#D9A441]" />
           </div>
           <CardTitle className="text-2xl">{title}</CardTitle>
           <p className="text-sm text-muted-foreground">{subtitle}</p>

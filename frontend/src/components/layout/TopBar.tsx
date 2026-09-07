@@ -134,7 +134,7 @@ function useLiveNotifications(): LiveNotification[] {
         desc: `${appt.patientName} • ${appt.department} • ${appt.timeSlot}`,
         time: appt.date,
         icon: Zap,
-        color: "text-blue-700 bg-blue-500/10",
+        color: "text-teal-700 bg-teal-500/10",
       });
     }
   }

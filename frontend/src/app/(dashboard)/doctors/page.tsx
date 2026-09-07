@@ -75,7 +75,7 @@ export default function DoctorsPage() {
                 <CardHeader>
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-3">
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#e3f0f9] text-[#11507a]">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#E6F3EF] text-[#0B423C]">
                         <UserRound className="h-5 w-5" />
                       </span>
                       <div>

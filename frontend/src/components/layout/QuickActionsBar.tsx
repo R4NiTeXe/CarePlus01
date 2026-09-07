@@ -32,9 +32,9 @@ export function QuickActionsBar() {
 
   return (
     <>
-      <div className="print-hidden sticky top-16 z-20 border-b border-border bg-[#f2f6fb]/95 backdrop-blur dark:bg-card/95">
+      <div className="print-hidden sticky top-16 z-20 border-b border-border bg-[#F5F0E6]/95 backdrop-blur dark:bg-card/95">
         <div className="flex items-center gap-2 overflow-x-auto px-4 py-2.5 md:px-6">
-          <span className="flex shrink-0 items-center gap-1.5 text-sm font-medium text-[#1f3d5a] dark:text-foreground">
+          <span className="flex shrink-0 items-center gap-1.5 text-sm font-medium text-[#103B36] dark:text-foreground">
             <Zap className="h-4 w-4 text-clinical" /> Quick Actions
           </span>
           {visible.map((a) => (
@@ -42,7 +42,7 @@ export function QuickActionsBar() {
               key={a.key}
               variant="outline"
               size="sm"
-              className="shrink-0 rounded-full bg-white shadow-sm transition-all duration-200 hover:shadow-md hover:bg-[#f0f7ff] hover:-translate-y-px active:scale-[0.98] active:translate-y-0 dark:bg-card dark:hover:bg-accent/20"
+              className="shrink-0 rounded-full bg-white shadow-sm transition-all duration-200 hover:shadow-md hover:bg-[#F1EAD9] hover:-translate-y-px active:scale-[0.98] active:translate-y-0 dark:bg-card dark:hover:bg-accent/20"
               onClick={() => setModal(a.key)}
             >
               <a.icon className="mr-1.5 h-3.5 w-3.5 text-clinical" />

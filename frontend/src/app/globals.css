@@ -4,47 +4,47 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 210 60% 12%;
+    --background: 36 43% 96%;
+    --foreground: 171 17% 14%;
     --card: 0 0% 100%;
-    --card-foreground: 210 60% 12%;
+    --card-foreground: 171 17% 14%;
     --popover: 0 0% 100%;
-    --popover-foreground: 210 60% 12%;
-    --primary: 201 69% 36%;
+    --popover-foreground: 171 17% 14%;
+    --primary: 173 73% 21%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 210 60% 17%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 199 91% 64%;
-    --accent-foreground: 210 60% 12%;
+    --secondary: 36 30% 94%;
+    --secondary-foreground: 171 17% 18%;
+    --muted: 36 30% 94%;
+    --muted-foreground: 30 12% 45%;
+    --accent: 38 65% 55%;
+    --accent-foreground: 171 17% 14%;
     --destructive: 0 72% 45%;
     --destructive-foreground: 0 0% 100%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 201 69% 36%;
+    --border: 32 25% 89%;
+    --input: 32 25% 89%;
+    --ring: 173 73% 21%;
     --radius: 0.75rem;
   }
   .dark {
-    --background: 210 60% 8%;
-    --foreground: 210 40% 96%;
-    --card: 210 55% 12%;
-    --card-foreground: 210 40% 96%;
-    --popover: 210 55% 12%;
-    --popover-foreground: 210 40% 96%;
-    --primary: 199 91% 64%;
-    --primary-foreground: 210 60% 8%;
-    --secondary: 210 50% 16%;
-    --secondary-foreground: 210 40% 96%;
-    --muted: 210 50% 16%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 199 91% 64%;
-    --accent-foreground: 210 60% 8%;
+    --background: 170 35% 7%;
+    --foreground: 40 20% 94%;
+    --card: 170 30% 10%;
+    --card-foreground: 40 20% 94%;
+    --popover: 170 30% 10%;
+    --popover-foreground: 40 20% 94%;
+    --primary: 162 58% 67%;
+    --primary-foreground: 170 35% 7%;
+    --secondary: 170 25% 14%;
+    --secondary-foreground: 40 20% 94%;
+    --muted: 170 25% 14%;
+    --muted-foreground: 35 15% 65%;
+    --accent: 162 58% 67%;
+    --accent-foreground: 170 35% 7%;
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
-    --border: 210 50% 20%;
-    --input: 210 50% 20%;
-    --ring: 199 91% 64%;
+    --border: 170 25% 18%;
+    --input: 170 25% 18%;
+    --ring: 162 58% 67%;
   }
 }
 
@@ -75,8 +75,8 @@
     color: #c62828;
   }
   .badge-info {
-    background: #e3f0f9;
-    color: #11507a;
+    background: #e6f3ef;
+    color: #0b423c;
   }
 }
 
