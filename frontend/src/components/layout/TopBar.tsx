@@ -196,9 +196,9 @@ export function TopBar({ onMenu }: { onMenu: () => void }) {
   const currentRole = ROLES.find((r) => r.value === role) ?? ROLES[0];
   // Search only offers destinations this role may actually open — otherwise a
   // click bounces off the route guard and feels broken.
-  const canSeePatients = pathAllowed(role, "/patients/x");
-  const canSeeDoctors = pathAllowed(role, "/doctors");
-  const canSeeAppointments = pathAllowed(role, "/appointments");
+  const canSeePatients = role !== null && pathAllowed(role, "/patients/x");
+  const canSeeDoctors = role !== null && pathAllowed(role, "/doctors");
+  const canSeeAppointments = role !== null && pathAllowed(role, "/appointments");
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {

@@ -95,6 +95,30 @@ export async function hasActiveAppointment(
   return !!hit;
 }
 
+// A patient cannot be in two active appointments at the same date and time slot.
+export async function hasPatientConflict(
+  patientId: string,
+  date: string,
+  timeSlot: string,
+): Promise<boolean> {
+  if (!isDbReady()) {
+    return db.appointments.some(
+      (a) =>
+        a.patientId === patientId &&
+        a.date === date &&
+        a.timeSlot === timeSlot &&
+        ACTIVE_STATUSES.includes(a.status),
+    );
+  }
+  const hit = await AppointmentModel.findOne({
+    patientId,
+    date,
+    timeSlot,
+    status: { $in: ACTIVE_STATUSES },
+  }).lean();
+  return !!hit;
+}
+
 export async function createAppointment(data: {
   patientId: string;
   patientName: string;

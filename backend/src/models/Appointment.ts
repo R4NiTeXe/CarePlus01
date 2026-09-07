@@ -86,7 +86,7 @@ const appointmentSchema = new Schema(
       required: false,
     },
   },
-  {},
+  { timestamps: true },
 );
 
 // One doctor, one slot, one active token — second lock for concurrent double

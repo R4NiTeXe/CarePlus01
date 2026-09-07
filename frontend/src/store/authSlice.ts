@@ -2,22 +2,13 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { RoleType } from "@/types/common";
 
 interface AuthState {
-  role: RoleType;
+  role: RoleType | null;
   userName: string;
 }
 
 const initialState: AuthState = {
-  role: "Admin",
-  userName: "Hospital Administrator",
-};
-
-const roleNames: Record<RoleType, string> = {
-  Admin: "Hospital Administrator",
-  Doctor: "Dr. Amit Verma",
-  Nurse: "Nurse Asha",
-  Pharmacist: "Pharmacist Ravi",
-  LabTech: "Dr. Anjali Gupta",
-  Cashier: "Cashier Meena",
+  role: null,
+  userName: "",
 };
 
 const authSlice = createSlice({
@@ -26,10 +17,11 @@ const authSlice = createSlice({
   reducers: {
     loginSuccess(state, action: PayloadAction<{ role: RoleType; userName: string }>) {
       state.role = action.payload.role;
-      state.userName = action.payload.userName || roleNames[action.payload.role];
+      // Always use the real name from the API — no hardcoded fallbacks.
+      state.userName = action.payload.userName;
     },
     logout(state) {
-      state.role = "Admin";
+      state.role = null;
       state.userName = "";
     },
   },

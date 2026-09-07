@@ -27,7 +27,8 @@ export function QuickActionsBar() {
     { key: "lab", label: "Order Lab", icon: FlaskConical, roles: ["Admin", "Doctor", "Nurse"] },
     { key: "dispense", label: "Dispense", icon: Pill, roles: ["Admin", "Pharmacist"] },
   ];
-  const visible = actions.filter((a) => a.roles.includes(role));
+  // No role yet (signed out / rehydrating) → no actions rather than wrong ones.
+  const visible = role === null ? [] : actions.filter((a) => a.roles.includes(role));
 
   return (
     <>

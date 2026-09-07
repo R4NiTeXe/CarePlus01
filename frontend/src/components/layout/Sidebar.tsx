@@ -121,10 +121,12 @@ function SidebarInner({
           </div>
 
           <nav className="flex-1 space-y-1 overflow-y-auto p-3" aria-label="Sidebar navigation">
-            {NAV_ITEMS.filter(
-              (item) =>
-                (!item.adminOnly || role === "Admin") && (!item.roles || item.roles.includes(role)),
-            ).map((item) => {
+              {NAV_ITEMS.filter(
+                (item) =>
+                  role !== null &&
+                  (!item.adminOnly || role === "Admin") &&
+                  (!item.roles || item.roles.includes(role)),
+              ).map((item) => {
               const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
               const count = item.badge === null ? null : counts[item.badge];
               const Icon = item.icon;

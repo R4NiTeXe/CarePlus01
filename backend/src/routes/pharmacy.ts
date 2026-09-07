@@ -1,18 +1,10 @@
 import { Router } from "express";
 import { z } from "zod";
-import { ApiError } from "../errors.js";
 import { auditLog, requireAuth, requireRole, validate } from "../middleware.js";
-import {
-  createMedicine,
-  dispenseMedicine,
-  getMedicineById,
-  listMedicines,
-} from "../repos/medicineRepo.js";
-import { getPatientById } from "../repos/patientRepo.js";
-import { appendInvoiceItem, createInvoice, findOpenInvoice } from "../repos/invoiceRepo.js";
+import { createMedicine, listMedicines } from "../repos/medicineRepo.js";
 import { paginatedMeta, parsePagination } from "../paginate.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { billTotals } from "../utils/money.js";
+import { dispenseAndBill } from "../services/pharmacyService.js";
 
 const router = Router();
 router.use(requireAuth);
@@ -63,60 +55,20 @@ router.post(
   }),
 );
 
-// POST /api/pharmacy/dispense — checks stock, deducts, posts charge to billing
+// POST /api/pharmacy/dispense — validates, decrements stock, posts charge to billing.
+// Business logic is in pharmacyService — the route just validates + delegates.
 router.post(
   "/dispense",
   requireRole("Admin", "Pharmacist"),
   validate(dispenseSchema),
   asyncHandler(async (req, res, next) => {
     const { medicineId, qty, patientId } = req.body as z.infer<typeof dispenseSchema>;
-    const med = await getMedicineById(medicineId);
-    if (!med) {
-      next(ApiError.notFound("Medicine"));
-      return;
+    try {
+      const result = await dispenseAndBill(medicineId, qty, patientId);
+      res.json({ data: result });
+    } catch (err) {
+      next(err);
     }
-    // Block by actual date too — status alone can lag behind the calendar
-    const today = new Date().toISOString().slice(0, 10);
-    const expiredByDate = new Date(med.expiryDate as unknown as string | Date) < new Date(today);
-    if (med.status === "Expired" || expiredByDate) {
-      next(ApiError.conflict("Cannot dispense an expired batch"));
-      return;
-    }
-    if (med.stockCount < qty) {
-      next(ApiError.conflict(`Only ${med.stockCount} units in stock`));
-      return;
-    }
-    const patient = await getPatientById(patientId);
-    if (!patient) {
-      next(ApiError.notFound("Patient"));
-      return;
-    }
-    const updated = await dispenseMedicine(medicineId, qty);
-    if (!updated) {
-      // Lost a concurrent race after the pre-check — atomic guard refused
-      next(ApiError.conflict("Insufficient stock"));
-      return;
-    }
-    const charge = med.unitPrice * qty;
-    // Post charge to billing: append to patient's open bill, else open a new one
-    const lineItem = {
-      desc: `${med.brandName} x${qty}`,
-      dept: "Pharmacy" as const,
-      amount: charge,
-    };
-    const openBill = await findOpenInvoice(patientId);
-    const bill = openBill
-      ? await appendInvoiceItem(openBill.id, lineItem)
-      : await createInvoice({
-          patientId,
-          patientName: patient.fullName,
-          items: [lineItem],
-          ...billTotals([lineItem], 0),
-          paymentMethod: "Cash",
-        });
-    res.json({
-      data: { medicine: updated, dispensedQty: qty, charge, patientId, billId: bill?.id ?? null },
-    });
   }),
 );
 

@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/apiClient";
 import type { Doctor } from "@/types/doctor";
@@ -11,7 +10,6 @@ interface DoctorsResponse {
 }
 
 export function useDoctors(filters?: { department?: string; availability?: string; limit?: number; page?: number }) {
-  const router = useRouter();
   return useQuery({
     queryKey: ["doctors", filters],
     queryFn: async () => {
@@ -23,19 +21,14 @@ export function useDoctors(filters?: { department?: string; availability?: strin
       const { data } = await apiClient.get<DoctorsResponse>("/doctors", { params });
       return data;
     },
+    // 401 handling is centralised in apiClient.ts interceptor — it silently
+    // refreshes the token and retries before ever surfacing an error here.
     retry: false,
-    throwOnError: (error) => {
-      if (error instanceof Error && "status" in error && (error as { status: number }).status === 401) {
-        router.push("/login");
-      }
-      return false;
-    },
   });
 }
 
 export function useCreateDoctor() {
   const queryClient = useQueryClient();
-  const router = useRouter();
   return useMutation({
     mutationFn: async (payload: Omit<Doctor, "id">) => {
       const { data } = await apiClient.post<{ data: Doctor }>("/doctors", payload);
@@ -44,10 +37,6 @@ export function useCreateDoctor() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["doctors"] });
     },
-    onError: (error) => {
-      if (error instanceof Error && "status" in error && (error as { status: number }).status === 401) {
-        router.push("/login");
-      }
-    },
   });
 }
+

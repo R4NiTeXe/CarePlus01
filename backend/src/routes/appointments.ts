@@ -6,6 +6,7 @@ import {
   createAppointment,
   getAppointmentById,
   hasActiveAppointment,
+  hasPatientConflict,
   listAppointments,
   updateAppointmentStatus,
 } from "../repos/appointmentRepo.js";
@@ -29,7 +30,13 @@ const createSchema = z.object({
   doctorId: z.string().min(1),
   doctorName: z.string().min(2),
   department: z.string().min(2),
-  date: z.string().min(1),
+  // Enforce ISO 8601 date — prevents "tomorrow", "ASAP", or past-date storage.
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "date must be YYYY-MM-DD")
+    .refine((v) => !Number.isNaN(new Date(`${v}T00:00:00Z`).getTime()), {
+      message: "date must be a real calendar date",
+    }),
   timeSlot: z.string().min(1),
   priority: z.enum(["Routine", "Urgent", "Emergency"]).default("Routine"),
   reason: z.string().min(3).max(300),
@@ -85,6 +92,15 @@ router.post(
       next(
         ApiError.conflict(
           `${body.doctorName} is already booked at ${body.timeSlot} on ${body.date}`,
+        ),
+      );
+      return;
+    }
+    // A patient cannot physically be in two places at the same time.
+    if (await hasPatientConflict(body.patientId, body.date, body.timeSlot)) {
+      next(
+        ApiError.conflict(
+          `${patient.fullName} already has an active appointment at ${body.timeSlot} on ${body.date}`,
         ),
       );
       return;

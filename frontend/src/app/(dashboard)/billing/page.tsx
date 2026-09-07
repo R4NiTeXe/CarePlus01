@@ -20,12 +20,16 @@ export default function BillingPage() {
   const collectPayment = useCollectPayment();
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState("All");
+  const [collectError, setCollectError] = useState("");
 
   useEffect(() => {
     setPage(1);
   }, [filter]);
 
-  const { data, isLoading } = useInvoices({ page });
+  // Pass the status filter to the server so the query covers the full dataset,
+  // not just the rows visible on the current page.
+  const serverStatus = filter === "All" ? undefined : filter;
+  const { data, isLoading } = useInvoices({ page, status: serverStatus });
   const invoices = data?.data ?? [];
   const [createOpen, setCreateOpen] = useState(false);
   const [pay, setPay] = useState<ApiInvoice | null>(null);
@@ -37,7 +41,8 @@ export default function BillingPage() {
   const collected = data?.meta.collected ?? invoices.reduce((s, i) => s + i.paidAmount, 0);
   const pending = data?.meta.pending ?? invoices.reduce((s, i) => s + i.balanceDue, 0);
   const tpa = invoices.filter((i) => i.paymentMethod === "TPA Insurance" && i.balanceDue > 0).length;
-  const list = invoices.filter((i) => filter === "All" || i.status === filter);
+  // With server-side filtering, all rows in the response match the filter already.
+  const list = invoices;
 
   return (
     <div>
@@ -110,14 +115,27 @@ export default function BillingPage() {
           <div className="grid gap-3">
             <p className="text-sm text-muted-foreground">Balance due: <span className="font-bold text-foreground">{pay && formatINR(pay.balanceDue)}</span></p>
             <label className="grid gap-1 text-sm">Amount<Input type="number" value={amount} onChange={(e) => setAmount(Number(e.target.value))} /></label>
+            {collectError && <p role="alert" className="text-sm text-red-600">{collectError}</p>}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setPay(null)} disabled={collectPayment.isPending}>Cancel</Button>
             <Button
               disabled={collectPayment.isPending}
               onClick={() => {
-                if (pay && amount > 0) collectPayment.mutate({ id: pay.id, amount: Math.min(amount, pay.balanceDue) });
-                setPay(null);
+                if (!pay || amount <= 0) return;
+                setCollectError("");
+                collectPayment.mutate(
+                  { id: pay.id, amount: Math.min(amount, pay.balanceDue) },
+                  {
+                    // Keep the dialog open on error so the cashier can see the message.
+                    onError: (err) =>
+                      setCollectError(
+                        err instanceof Error ? err.message : "Payment failed. Please retry.",
+                      ),
+                    // Only close after a confirmed successful write.
+                    onSuccess: () => setPay(null),
+                  },
+                );
               }}
             >
               {collectPayment.isPending ? "Recording…" : "Record payment"}
@@ -136,8 +154,8 @@ export default function BillingPage() {
                 <p className="text-xs text-muted-foreground">GSTIN 27AABCC1234F1Z5 • Receipt {print.id} • {print.date}</p>
               </div>
               <p><span className="text-muted-foreground">Patient:</span> {print.patientName} ({print.patientId})</p>
-              {print.items.map((it, i) => (
-                <p key={i} className="flex justify-between border-b py-1"><span>{it.desc} <span className="text-muted-foreground">• {it.dept}</span></span><span>{formatINR(it.amount)}</span></p>
+              {print.items.map((it) => (
+                <p key={`${it.desc}-${it.dept}`} className="flex justify-between border-b py-1"><span>{it.desc} <span className="text-muted-foreground">• {it.dept}</span></span><span>{formatINR(it.amount)}</span></p>
               ))}
               <p className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>{formatINR(print.subtotal)}</span></p>
               <p className="flex justify-between"><span className="text-muted-foreground">Tax</span><span>{formatINR(print.tax)}</span></p>
