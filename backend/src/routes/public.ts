@@ -3,6 +3,7 @@ import rateLimit, { type RateLimitExceededEventHandler } from "express-rate-limi
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { listDepartments } from "../repos/departmentRepo.js";
 import { listDoctors } from "../repos/doctorRepo.js";
+import { getSettings } from "../repos/settingsRepo.js";
 
 const router = Router();
 
@@ -64,6 +65,14 @@ router.get(
       })),
       meta: { total: data.length },
     });
+  }),
+);
+
+// GET /api/v1/public/settings — hospital profile for the landing page (safe fields only)
+router.get(
+  "/settings",
+  asyncHandler(async (_req, res) => {
+    res.json({ data: await getSettings() });
   }),
 );
 

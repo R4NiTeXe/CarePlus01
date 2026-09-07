@@ -131,7 +131,7 @@ export default function SettingsPage() {
             <label className="grid gap-1 text-sm">OPD slot interval (min)
               <Input type="number" min={10} max={60} step={5} value={slot} onChange={(e) => { setSlot(Number(e.target.value)); setDirty(true); }} />
             </label>
-            <p className="text-xs text-muted-foreground">Saved on this device; the slot interval drives the booking slot picker.</p>
+            <p className="text-xs text-muted-foreground">Saved for the whole hospital on every device; the slot interval drives the booking slot picker.</p>
             <div>
               <Button size="sm" onClick={onSave} disabled={!dirty}>Save profile</Button>
               {saved && <span className="ml-2 text-sm text-green-700">Saved.</span>}

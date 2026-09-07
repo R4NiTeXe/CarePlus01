@@ -21,6 +21,7 @@ import staffRoutes from "./routes/staff.js";
 import auditRoutes from "./routes/audit.js";
 import dashboardRoutes from "./routes/dashboard.js";
 import usersRoutes from "./routes/users.js";
+import settingsRoutes from "./routes/settings.js";
 import publicRoutes from "./routes/public.js";
 import docsRoutes from "./docs/router.js";
 
@@ -99,6 +100,7 @@ export function createApp(): express.Express {
   app.use("/api/v1/audit", auditRoutes);
   app.use("/api/v1/dashboard", dashboardRoutes);
   app.use("/api/v1/users", usersRoutes);
+  app.use("/api/v1/settings", settingsRoutes);
   app.use("/api/v1/public", publicRoutes);
 
   app.use(notFound);

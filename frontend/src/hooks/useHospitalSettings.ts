@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { apiClient } from "@/lib/apiClient";
 
 export interface HospitalSettings {
   hospitalName: string;
@@ -51,28 +52,81 @@ function load(): HospitalSettings {
   }
 }
 
-// Hospital-level preferences, persisted on this device.
-// The OPD slot interval genuinely drives the booking slot picker.
+function sanitize(input: Partial<HospitalSettings>): HospitalSettings {
+  return {
+    hospitalName:
+      typeof input.hospitalName === "string" && input.hospitalName.trim().length > 0
+        ? input.hospitalName
+        : DEFAULTS.hospitalName,
+    slotMinutes: [10, 15, 20, 30, 60].includes(input.slotMinutes as number)
+      ? (input.slotMinutes as HospitalSettings["slotMinutes"])
+      : DEFAULTS.slotMinutes,
+    contactPhone: typeof input.contactPhone === "string" ? input.contactPhone : "",
+    contactPhoneHref: typeof input.contactPhoneHref === "string" ? input.contactPhoneHref : "",
+    address: typeof input.address === "string" ? input.address : "",
+    opdHoursNote:
+      typeof input.opdHoursNote === "string" && input.opdHoursNote.trim().length > 0
+        ? input.opdHoursNote
+        : DEFAULTS.opdHoursNote,
+  };
+}
+
+// Hospital profile, shared by every device. Reads prefer the server copy
+// (public endpoint — safe on logged-out pages, never triggers auth redirects)
+// and fall back to this device's copy when offline. Saves always persist
+// locally and sync to the server when the signer is an administrator.
 export function useHospitalSettings(): {
   settings: HospitalSettings;
+  source: "server" | "device";
   saveSettings: (next: HospitalSettings) => void;
 } {
   const [settings, setSettings] = useState<HospitalSettings>(DEFAULTS);
+  const [source, setSource] = useState<"server" | "device">("device");
 
   useEffect(() => {
+    let cancelled = false;
     setSettings(load());
+    void (async () => {
+      try {
+        const { data } = await apiClient.get<{ data: Partial<HospitalSettings> }>(
+          "/public/settings",
+        );
+        if (!cancelled && data?.data) {
+          const next = sanitize(data.data);
+          setSettings(next);
+          setSource("server");
+          try {
+            window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+          } catch {
+            // storage unavailable (private mode) — keep in-memory value
+          }
+        }
+      } catch {
+        // offline or server down — device copy stays
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const saveSettings = useCallback((next: HospitalSettings): void => {
-    setSettings(next);
+    const clean = sanitize(next);
+    setSettings(clean);
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(clean));
     } catch {
       // storage unavailable (private mode) — keep in-memory value
     }
+    // Admins propagate to every device; others keep the device copy (the
+    // server answers 403, which we quietly ignore).
+    void apiClient
+      .put("/settings", clean)
+      .then(() => setSource("server"))
+      .catch(() => {});
   }, []);
 
-  return { settings, saveSettings };
+  return { settings, source, saveSettings };
 }
 
 // OPD working hours 09:00–17:00 with a lunch break 13:00–14:00.

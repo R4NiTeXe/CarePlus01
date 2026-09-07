@@ -12,6 +12,7 @@ import { InventoryModel } from "./models/Inventory.js";
 import { StaffModel } from "./models/Staff.js";
 import { AuditModel } from "./models/Audit.js";
 import { UserModel } from "./models/User.js";
+import { HospitalSettingsModel } from "./models/HospitalSettings.js";
 import { hashPassword } from "./repos/userRepo.js";
 import { ID_SPECS, syncCounter } from "./repos/counterRepo.js";
 
@@ -122,6 +123,24 @@ async function main(): Promise<void> {
       console.log(`demo staff created: ${s.email} (temporary password, change at first sign-in)`);
     }
   }
+
+  // Hospital profile singleton — landing page, slot picker, support contacts
+  await HospitalSettingsModel.updateOne(
+    { key: "hospital" },
+    {
+      $setOnInsert: {
+        key: "hospital",
+        hospitalName: "CarePlus Multi-Speciality Hospital",
+        contactPhone: "",
+        contactPhoneHref: "",
+        address: "",
+        opdHoursNote: "OPD Mon–Sat, 9 AM – 5 PM • Emergency wing never closes",
+        slotMinutes: 30,
+      },
+    },
+    { upsert: true },
+  );
+  console.log("hospital settings ensured");
 
   // Default admin (dev only) — change password immediately in real deployments
   const adminEmail = process.env.SEED_ADMIN_EMAIL ?? "admin@careplus.local";

@@ -117,6 +117,20 @@ export const openApiSpec = {
         responses: { "200": { description: "temp password" } },
       },
     },
+    "/api/v1/settings": {
+      get: { summary: "Get hospital settings", responses: { "200": { description: "settings" } } },
+      put: {
+        summary: "Update hospital settings (Admin)",
+        responses: { "200": { description: "settings" } },
+      },
+    },
+    "/api/v1/public/settings": {
+      get: {
+        summary: "Public hospital profile",
+        responses: { "200": { description: "settings" } },
+        security: [],
+      },
+    },
     "/api/v1/public/departments": {
       get: {
         summary: "Public department listing",
