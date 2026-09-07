@@ -21,6 +21,7 @@ describe("billing and pagination", () => {
       });
     expect(create.status).toBe(201);
     const id = create.body.data.id as string;
+    expect(id.startsWith(`INV-${new Date().getFullYear()}-`)).toBe(true);
     const total = create.body.data.totalAmount as number;
 
     const over = await request(createApp())
