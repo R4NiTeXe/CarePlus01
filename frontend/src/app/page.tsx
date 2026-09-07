@@ -85,6 +85,14 @@ const GALLERY = [
   { src: "/images/icu-care.jpg", alt: "Nurse monitoring a patient in the ICU", caption: "Round-the-clock ICU" },
 ];
 
+const CARTOONS = [
+  { src: "/images/cartoons/cartoon-lion-doctor.jpg", alt: "Friendly cartoon lion doctor waving", caption: "Dr. Leo says brush twice a day!" },
+  { src: "/images/cartoons/cartoon-elephant-nurse.jpg", alt: "Cute cartoon elephant nurse smiling", caption: "Nurse Ellie keeps you brave" },
+  { src: "/images/cartoons/cartoon-giraffe.jpg", alt: "Smiling cartoon giraffe with balloons", caption: "Gigi loves tall checkups" },
+  { src: "/images/cartoons/cartoon-bunny-patient.jpg", alt: "Happy cartoon bunny with a bandage", caption: "Bunty got his bandage!" },
+  { src: "/images/cartoons/cartoon-healthy-kids.jpg", alt: "Happy cartoon kids playing in a park", caption: "Back to play in no time" },
+];
+
 const TESTIMONIALS = [
   { quote: "My mother's knee surgery to discharge took four days. The token system meant we never waited more than ten minutes.", name: "R. Banerjee", detail: "Orthopedics patient family" },
   { quote: "Blood tests at 9 AM, doctor consult at 11 with reports in hand. Everything under one roof genuinely works.", name: "S. Iyer", detail: "General Medicine OPD" },
@@ -387,6 +395,34 @@ export default function LandingPage() {
                   {g.caption}
                 </figcaption>
               </motion.figure>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Kids Corner — friendly cartoons for little patients (static, no animation) */}
+      <section className="border-y border-border bg-white">
+        <div className="mx-auto w-full max-w-6xl px-4 py-14">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-clinical">Kids Corner</p>
+            <h2 className="mt-1 text-2xl font-bold text-navy">Hospital feels less scary with friends</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Meet the buddies waiting for you in our pediatric ward.</p>
+          </div>
+          <div className="mt-6 overflow-hidden rounded-2xl shadow-card">
+            <SafeImage
+              src="/images/cartoons/cartoon-healthy-kids.jpg"
+              alt="Happy cartoon kids playing together in a sunny park"
+              className="aspect-[21/9] w-full"
+            />
+          </div>
+          <div className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
+            {CARTOONS.slice(0, 4).map((c) => (
+              <figure key={c.src} className="overflow-hidden rounded-2xl bg-canvas shadow-card">
+                <SafeImage src={c.src} alt={c.alt} className="aspect-square w-full" />
+                <figcaption className="px-3 py-2 text-center text-xs font-medium text-muted-foreground">
+                  {c.caption}
+                </figcaption>
+              </figure>
             ))}
           </div>
         </div>
