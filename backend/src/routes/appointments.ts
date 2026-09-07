@@ -5,6 +5,7 @@ import { auditLog, requireAuth, requireRole, validate } from "../middleware.js";
 import {
   createAppointment,
   getAppointmentById,
+  hasActiveAppointment,
   listAppointments,
   updateAppointmentStatus,
 } from "../repos/appointmentRepo.js";
@@ -76,6 +77,14 @@ router.post(
     const patient = await getPatientById(body.patientId);
     if (!patient) {
       next(ApiError.notFound("Patient"));
+      return;
+    }
+    if (await hasActiveAppointment(body.doctorId, body.date, body.timeSlot)) {
+      next(
+        ApiError.conflict(
+          `${body.doctorName} is already booked at ${body.timeSlot} on ${body.date}`,
+        ),
+      );
       return;
     }
     const appt = await createAppointment({

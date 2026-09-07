@@ -65,6 +65,36 @@ export async function getAppointmentById(
   return (doc as unknown as (typeof db.appointments)[number]) ?? null;
 }
 
+const ACTIVE_STATUSES: Array<(typeof db.appointments)[number]["status"]> = [
+  "Waiting",
+  "In Triage",
+  "With Doctor",
+];
+
+// A doctor cannot hold two active tokens for the same slot.
+export async function hasActiveAppointment(
+  doctorId: string,
+  date: string,
+  timeSlot: string,
+): Promise<boolean> {
+  if (!isDbReady()) {
+    return db.appointments.some(
+      (a) =>
+        a.doctorId === doctorId &&
+        a.date === date &&
+        a.timeSlot === timeSlot &&
+        ACTIVE_STATUSES.includes(a.status),
+    );
+  }
+  const hit = await AppointmentModel.findOne({
+    doctorId,
+    date,
+    timeSlot,
+    status: { $in: ACTIVE_STATUSES },
+  }).lean();
+  return !!hit;
+}
+
 export async function createAppointment(data: {
   patientId: string;
   patientName: string;

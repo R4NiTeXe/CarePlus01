@@ -71,6 +71,31 @@ describe("appointment status machine", () => {
     expect(bad.status).toBe(409);
   });
 
+  it("rejects double-booking the same doctor and slot", async () => {
+    const token = await adminToken();
+    const payload = {
+      patientId: "CP-1001",
+      doctorId: "DOC-101",
+      doctorName: "Dr. Amit Verma",
+      department: "Cardiology",
+      date: "2026-09-06",
+      timeSlot: "02:00 PM",
+      priority: "Routine",
+      reason: "First visit",
+    };
+    const first = await request(createApp())
+      .post("/api/v1/appointments")
+      .set("Authorization", `Bearer ${token}`)
+      .send(payload);
+    expect(first.status).toBe(201);
+
+    const clash = await request(createApp())
+      .post("/api/v1/appointments")
+      .set("Authorization", `Bearer ${token}`)
+      .send(payload);
+    expect(clash.status).toBe(409);
+  });
+
   it("rejects transition on unknown appointment", async () => {
     const token = await adminToken();
     const res = await request(createApp())

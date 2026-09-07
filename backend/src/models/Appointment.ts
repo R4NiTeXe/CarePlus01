@@ -89,4 +89,14 @@ const appointmentSchema = new Schema(
   {},
 );
 
+// One doctor, one slot, one active token — second lock for concurrent double
+// bookings (the route also checks first for a clear 409 message).
+appointmentSchema.index(
+  { doctorId: 1, date: 1, timeSlot: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { status: { $in: ["Waiting", "In Triage", "With Doctor"] } },
+  },
+);
+
 export const AppointmentModel = mongoose.model("Appointment", appointmentSchema);
