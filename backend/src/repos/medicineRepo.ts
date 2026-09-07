@@ -97,7 +97,7 @@ export async function dispenseMedicine(
     const med = db.medicines.find((m) => m.id === id) ?? null;
     if (!med) return null;
     med.stockCount -= qty;
-    if (med.stockCount < med.minThreshold) med.status = "Low Stock";
+    if (med.status !== "Expired" && med.stockCount < med.minThreshold) med.status = "Low Stock";
     return med;
   }
   // Single atomic write — decrement + status sync together, no second save
@@ -109,9 +109,16 @@ export async function dispenseMedicine(
     [
       { $set: { stockCount: { $subtract: ["$stockCount", qty] } } },
       {
+        // Expired stays Expired no matter the count — never mask it as Low Stock.
         $set: {
           status: {
-            $cond: [{ $lt: ["$stockCount", "$minThreshold"] }, "Low Stock", "$status"],
+            $cond: [
+              { $eq: ["$status", "Expired"] },
+              "Expired",
+              {
+                $cond: [{ $lt: ["$stockCount", "$minThreshold"] }, "Low Stock", "$status"],
+              },
+            ],
           },
         },
       },
