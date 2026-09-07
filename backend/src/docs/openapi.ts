@@ -166,7 +166,11 @@ export const openApiSpec = {
       post: { summary: "Create patient", responses: { "201": { description: "created" } } },
     },
     "/api/v1/patients/{id}": {
-      get: { summary: "Get patient with visits", responses: { "200": { description: "patient" } } },
+      get: { summary: "Patient detail", responses: { "200": { description: "patient" } } },
+      patch: {
+        summary: "Update patient chart (Admin, Doctor, Nurse)",
+        responses: { "200": { description: "patient" } },
+      },
     },
     "/api/v1/appointments": {
       get: { summary: "List appointments", responses: { "200": { description: "list" } } },

@@ -1,12 +1,16 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { usePatientDetail } from "@/hooks/usePatients";
+import { usePatientDetail, useUpdatePatient } from "@/hooks/usePatients";
+import { useAppSelector } from "@/store/hooks";
+import { getApiErrorMessage } from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { ArrowLeft } from "lucide-react";
 
 interface Visit {
@@ -40,10 +44,70 @@ interface Bill {
   status: string;
 }
 
+const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+
 export default function PatientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const { data, isLoading, isError } = usePatientDetail(id);
+  const role = useAppSelector((s) => s.auth.role);
+  const canEdit = role === "Admin" || role === "Doctor" || role === "Nurse";
+  const updatePatient = useUpdatePatient(id);
+  const [editOpen, setEditOpen] = useState(false);
+  const [form, setForm] = useState({
+    phone: "",
+    email: "",
+    address: "",
+    bloodGroup: "O+",
+    allergies: "",
+    chronic: "",
+    ecName: "",
+    ecPhone: "",
+    ecRelation: "",
+  });
+  const [saveError, setSaveError] = useState("");
   const p = data;
+
+  const openEdit = (): void => {
+    if (!p) return;
+    setForm({
+      phone: p.phone,
+      email: p.email,
+      address: p.address,
+      bloodGroup: p.bloodGroup,
+      allergies: p.allergies.join(", "),
+      chronic: p.chronicConditions.join(", "),
+      ecName: p.emergencyContact.name,
+      ecPhone: p.emergencyContact.phone,
+      ecRelation: p.emergencyContact.relation,
+    });
+    setSaveError("");
+    setEditOpen(true);
+  };
+
+  const save = (): void => {
+    setSaveError("");
+    const split = (s: string): string[] =>
+      s.split(",").map((x) => x.trim()).filter(Boolean);
+    updatePatient.mutate(
+      {
+        phone: form.phone.trim(),
+        email: form.email.trim(),
+        address: form.address.trim(),
+        bloodGroup: form.bloodGroup,
+        allergies: split(form.allergies),
+        chronicConditions: split(form.chronic),
+        emergencyContact: {
+          name: form.ecName.trim(),
+          phone: form.ecPhone.trim(),
+          relation: form.ecRelation.trim(),
+        },
+      },
+      {
+        onSuccess: () => setEditOpen(false),
+        onError: (e) => setSaveError(getApiErrorMessage(e)),
+      },
+    );
+  };
 
   if (isLoading) {
     return (
@@ -72,7 +136,12 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
       <PageHeader
         title={`${p.fullName} — EMR`}
         subtitle={`${p.id} • Registered ${p.registeredDate}`}
-        actions={<Button asChild variant="outline" size="sm"><Link href="/patients"><ArrowLeft className="mr-1.5 h-4 w-4" />Back</Link></Button>}
+        actions={
+          <div className="flex gap-2">
+            {canEdit && <Button size="sm" onClick={openEdit}>Edit chart</Button>}
+            <Button asChild variant="outline" size="sm"><Link href="/patients"><ArrowLeft className="mr-1.5 h-4 w-4" />Back</Link></Button>
+          </div>
+        }
       />
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="rounded-2xl shadow-card">
@@ -92,6 +161,49 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
             <p className="text-muted-foreground">{p.chronicConditions.join(", ") || "None"}</p>
           </CardContent>
         </Card>
+      <Dialog open={editOpen} onOpenChange={(o) => { if (!o) setEditOpen(false); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle>Edit chart — {p.fullName}</DialogTitle></DialogHeader>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="grid gap-1 text-sm">Phone
+              <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+            </label>
+            <label className="grid gap-1 text-sm">Email
+              <Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="optional" />
+            </label>
+            <label className="grid gap-1 text-sm sm:col-span-2">Address
+              <Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+            </label>
+            <label className="grid gap-1 text-sm">Blood group
+              <select value={form.bloodGroup} onChange={(e) => setForm({ ...form, bloodGroup: e.target.value })} className="rounded-lg border border-input bg-background px-3 py-2">
+                {BLOOD_GROUPS.map((b) => <option key={b}>{b}</option>)}
+              </select>
+            </label>
+            <label className="grid gap-1 text-sm">Allergies (comma separated)
+              <Input value={form.allergies} onChange={(e) => setForm({ ...form, allergies: e.target.value })} placeholder="Penicillin, Dust" />
+            </label>
+            <label className="grid gap-1 text-sm sm:col-span-2">Chronic conditions (comma separated)
+              <Input value={form.chronic} onChange={(e) => setForm({ ...form, chronic: e.target.value })} placeholder="Diabetes, Hypertension" />
+            </label>
+            <label className="grid gap-1 text-sm">Emergency contact
+              <Input value={form.ecName} onChange={(e) => setForm({ ...form, ecName: e.target.value })} />
+            </label>
+            <label className="grid gap-1 text-sm">Contact phone
+              <Input value={form.ecPhone} onChange={(e) => setForm({ ...form, ecPhone: e.target.value })} />
+            </label>
+            <label className="grid gap-1 text-sm sm:col-span-2">Relation
+              <Input value={form.ecRelation} onChange={(e) => setForm({ ...form, ecRelation: e.target.value })} placeholder="Spouse, Parent…" />
+            </label>
+          </div>
+          {saveError && <p role="alert" className="mt-3 text-sm text-red-600">{saveError}</p>}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditOpen(false)}>Cancel</Button>
+            <Button onClick={save} disabled={updatePatient.isPending}>
+              {updatePatient.isPending ? "Saving…" : "Save changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
         <Card className="rounded-2xl shadow-card lg:col-span-2">
           <CardHeader><CardTitle>Visit timeline</CardTitle></CardHeader>
           <CardContent className="grid gap-2 text-sm">

@@ -74,6 +74,25 @@ export function usePatientDetail(id: string | null) {
   });
 }
 
+export function useUpdatePatient(id: string) {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  return useMutation({
+    mutationFn: async (payload: Partial<Omit<ApiPatient, "id" | "registeredDate">>) => {
+      const { data } = await apiClient.patch<{ data: ApiPatient }>(`/patients/${id}`, payload);
+      return data.data;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["patients"] });
+    },
+    onError: (error) => {
+      if (error instanceof Error && "status" in error && (error as { status: number }).status === 401) {
+        router.push("/login");
+      }
+    },
+  });
+}
+
 export function useCreatePatient() {
   const queryClient = useQueryClient();
   const router = useRouter();

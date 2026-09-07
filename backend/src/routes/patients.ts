@@ -2,7 +2,12 @@ import { Router } from "express";
 import { z } from "zod";
 import { ApiError } from "../errors.js";
 import { auditLog, requireAuth, requireRole, validate } from "../middleware.js";
-import { createPatient, getPatientById, listPatients } from "../repos/patientRepo.js";
+import {
+  createPatient,
+  getPatientById,
+  listPatients,
+  updatePatient,
+} from "../repos/patientRepo.js";
 import { listAppointments } from "../repos/appointmentRepo.js";
 import { listLabs } from "../repos/labRepo.js";
 import { listInvoices } from "../repos/invoiceRepo.js";
@@ -69,6 +74,30 @@ router.post(
     const body = req.body as z.infer<typeof patientSchema>;
     const patient = await createPatient(body);
     res.status(201).json({ data: patient });
+  }),
+);
+
+// PATCH /api/patients/:id — correct chart details (allergies, contacts, …).
+// admissionStatus stays owned by bed movements and cannot be set here.
+const patientPatchSchema = patientSchema
+  .omit({ admissionStatus: true })
+  .partial()
+  .refine((v) => Object.keys(v).length > 0, "nothing to update");
+
+router.patch(
+  "/:id",
+  requireRole("Admin", "Doctor", "Nurse"),
+  validate(patientPatchSchema),
+  asyncHandler(async (req, res, next) => {
+    const updated = await updatePatient(
+      req.params.id,
+      req.body as Parameters<typeof updatePatient>[1],
+    );
+    if (!updated) {
+      next(ApiError.notFound("Patient"));
+      return;
+    }
+    res.json({ data: updated });
   }),
 );
 

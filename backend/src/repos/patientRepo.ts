@@ -65,6 +65,20 @@ export async function setAdmissionStatus(
   await PatientModel.updateOne({ id }, { $set: { admissionStatus: status } });
 }
 
+export async function updatePatient(
+  id: string,
+  patch: Partial<Omit<(typeof db.patients)[number], "id" | "registeredDate" | "admissionStatus">>,
+): Promise<(typeof db.patients)[number] | null> {
+  if (!isDbReady()) {
+    const patient = db.patients.find((p) => p.id === id) ?? null;
+    if (!patient) return null;
+    Object.assign(patient, patch);
+    return patient;
+  }
+  const doc = await PatientModel.findOneAndUpdate({ id }, { $set: patch }, { new: true }).lean();
+  return (doc as unknown as (typeof db.patients)[number]) ?? null;
+}
+
 export async function createPatient(
   data: Omit<(typeof db.patients)[number], "id" | "registeredDate"> & {
     id?: string;
