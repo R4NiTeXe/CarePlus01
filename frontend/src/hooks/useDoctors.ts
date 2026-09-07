@@ -10,7 +10,7 @@ interface DoctorsResponse {
   meta: { total: number; page: number; limit: number; totalPages: number };
 }
 
-export function useDoctors(filters?: { department?: string; availability?: string }) {
+export function useDoctors(filters?: { department?: string; availability?: string; limit?: number }) {
   const router = useRouter();
   return useQuery({
     queryKey: ["doctors", filters],
@@ -18,6 +18,7 @@ export function useDoctors(filters?: { department?: string; availability?: strin
       const params: Record<string, string> = {};
       if (filters?.department) params.department = filters.department;
       if (filters?.availability) params.availability = filters.availability;
+      if (filters?.limit) params.limit = String(Math.min(filters.limit, 100));
       const { data } = await apiClient.get<DoctorsResponse>("/doctors", { params });
       return data;
     },

@@ -20,7 +20,7 @@ type Form = z.infer<typeof schema>;
 const TESTS = ["Complete Blood Count", "Lipid Profile", "HbA1c (Glycated Hb)", "Thyroid Stimulating Hormone", "Kidney Function Test", "Liver Function Test", "Dengue NS1 Antigen", "ECG 12-Lead", "Chest X-Ray"];
 
 export function OrderLabModal({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { data: patientsData } = usePatients();
+  const { data: patientsData } = usePatients({ limit: 100 });
   const patients = patientsData?.data ?? [];
   const createOrder = useCreateLabOrder();
   const { register, handleSubmit, reset, formState: { errors } } = useForm<Form>({ resolver: zodResolver(schema) });

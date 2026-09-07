@@ -9,7 +9,7 @@ import { useCreateInvoice } from "@/hooks/useBilling";
 import { formatINR } from "@/lib/utils";
 
 export function CreateInvoiceModal({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { data: patientsData } = usePatients();
+  const { data: patientsData } = usePatients({ limit: 100 });
   const patients = patientsData?.data ?? [];
   const createInvoice = useCreateInvoice();
   const [patientId, setPatientId] = useState("");

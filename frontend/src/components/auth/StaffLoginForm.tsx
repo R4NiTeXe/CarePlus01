@@ -79,8 +79,15 @@ export function StaffLoginForm({
         typeof window !== "undefined"
           ? new URLSearchParams(window.location.search).get("redirect")
           : null;
+      // Same-tab paths only: reject protocol-relative (//evil), backslashes,
+      // and encoded tricks that would carry a fresh session off-site.
       const safeRedirect =
-        redirect && redirect.startsWith("/") && !redirect.startsWith("/login")
+        redirect &&
+        redirect.startsWith("/") &&
+        !redirect.startsWith("//") &&
+        !redirect.startsWith("/login") &&
+        !redirect.includes("\\") &&
+        !redirect.includes("%")
           ? redirect
           : null;
       router.push(safeRedirect ?? homeFor(data.data.role));

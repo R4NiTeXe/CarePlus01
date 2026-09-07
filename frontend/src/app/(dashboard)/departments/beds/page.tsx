@@ -32,7 +32,8 @@ export default function BedBoardPage() {
   const [admitPatientId, setAdmitPatientId] = useState("");
   const [saveError, setSaveError] = useState("");
   const [nextStatus, setNextStatus] = useState<string>("Occupied");
-  const { data: patientsData } = usePatients();
+  // Picker needs the whole directory, not just page one.
+  const { data: patientsData } = usePatients({ limit: 100 });
   const patients = patientsData?.data ?? [];
 
   useEffect(() => {

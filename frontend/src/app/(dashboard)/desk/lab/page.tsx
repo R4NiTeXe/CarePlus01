@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +10,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { useLabReports, useUpdateLabStatus } from "@/hooks/useLab";
 import { useAppSelector } from "@/store/hooks";
+import { getApiErrorMessage } from "@/lib/apiClient";
 import { FlaskConical, Clock, CheckCircle2 } from "lucide-react";
 
 const STAGES = ["Ordered", "Sample Collected", "Under Analysis", "Report Approved"] as const;
@@ -17,15 +19,19 @@ export default function LabDeskPage() {
   const userName = useAppSelector((s) => s.auth.userName);
   const { data, isLoading } = useLabReports();
   const updateLab = useUpdateLabStatus();
+  const [advanceError, setAdvanceError] = useState("");
   const labs = data?.data ?? [];
   const pending = labs.filter((l) => l.status !== "Report Approved");
   const byStage = (s: string): number => labs.filter((l) => l.status === s).length;
 
   const advance = (id: string, status: string): void => {
     const idx = STAGES.indexOf(status as (typeof STAGES)[number]);
-    if (idx >= 0 && idx < STAGES.length - 1) {
-      updateLab.mutate({ id, status: STAGES[idx + 1] });
-    }
+    if (idx < 0 || idx >= STAGES.length - 1) return;
+    setAdvanceError("");
+    updateLab.mutate(
+      { id, status: STAGES[idx + 1] },
+      { onError: (e) => setAdvanceError(getApiErrorMessage(e)) },
+    );
   };
 
   return (
@@ -44,6 +50,9 @@ export default function LabDeskPage() {
         <KpiCard icon={FlaskConical} label="Under analysis" value={String(byStage("Under Analysis"))} sub="on bench now" tone="blue" />
         <KpiCard icon={CheckCircle2} label="Approved" value={String(byStage("Report Approved"))} sub="signed reports" tone="green" />
       </div>
+      {advanceError && (
+        <p role="alert" className="mb-4 text-sm text-red-600">{advanceError}</p>
+      )}
       <Card className="mt-4 rounded-2xl shadow-card">
         <CardHeader>
           <CardTitle>{isLoading ? "Loading…" : `Worklist (${pending.length} pending)`}</CardTitle>
@@ -69,10 +78,16 @@ export default function LabDeskPage() {
                     <StatusBadge status={l.status} />
                   </TableCell>
                   <TableCell>
-                    {l.status !== "Report Approved" && (
-                      <Button size="sm" variant="outline" disabled={updateLab.isPending} onClick={() => advance(l.id, l.status)}>
-                        Advance →
+                    {l.status === "Under Analysis" ? (
+                      <Button asChild size="sm" variant="outline">
+                        <Link href="/lab-reports">Enter results →</Link>
                       </Button>
+                    ) : (
+                      l.status !== "Report Approved" && (
+                        <Button size="sm" variant="outline" disabled={updateLab.isPending} onClick={() => advance(l.id, l.status)}>
+                          Advance →
+                        </Button>
+                      )
                     )}
                   </TableCell>
                 </TableRow>

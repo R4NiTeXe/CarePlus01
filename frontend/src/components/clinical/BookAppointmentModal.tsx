@@ -26,9 +26,9 @@ const schema = z.object({
 type Form = z.infer<typeof schema>;
 
 export function BookAppointmentModal({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { data: patientsData } = usePatients();
+  const { data: patientsData } = usePatients({ limit: 100 });
   const patients = patientsData?.data ?? [];
-  const { data: doctorsData } = useDoctors();
+  const { data: doctorsData } = useDoctors({ limit: 100 });
   const doctors = doctorsData?.data ?? [];
   const createAppointment = useCreateAppointment();
   const { settings } = useHospitalSettings();

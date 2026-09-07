@@ -18,8 +18,9 @@ export default function BillingDeskPage() {
   const collect = useCollectPayment();
   const invoices = data?.data ?? [];
   const open = invoices.filter((i) => i.status !== "Paid");
-  const billed = invoices.reduce((s, i) => s + i.totalAmount, 0);
-  const collected = invoices.reduce((s, i) => s + i.paidAmount, 0);
+  // Server aggregates over the full ledger — same source as the billing page.
+  const billed = data?.meta.billed ?? invoices.reduce((s, i) => s + i.totalAmount, 0);
+  const collected = data?.meta.collected ?? invoices.reduce((s, i) => s + i.paidAmount, 0);
   const tpa = open.filter((i) => i.paymentMethod === "TPA Insurance").length;
 
   return (
@@ -34,7 +35,7 @@ export default function BillingDeskPage() {
         }
       />
       <div className="grid gap-4 sm:grid-cols-3">
-        <KpiCard icon={Wallet} label="Billed" value={formatINR(billed)} sub={`${invoices.length} invoices`} tone="blue" />
+        <KpiCard icon={Wallet} label="Billed" value={formatINR(billed)} sub={`${data?.meta.total ?? invoices.length} invoices`} tone="blue" />
         <KpiCard icon={HandCoins} label="Collected" value={formatINR(collected)} sub="cash + card + UPI + TPA" tone="green" />
         <KpiCard icon={Hourglass} label="Open (incl. TPA)" value={String(open.length)} sub={`${tpa} TPA claims pending`} tone="amber" />
       </div>

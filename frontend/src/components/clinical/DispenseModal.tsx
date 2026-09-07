@@ -9,9 +9,9 @@ import { usePatients } from "@/hooks/usePatients";
 import { formatINR } from "@/lib/utils";
 
 export function DispenseModal({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { data: medicinesData } = useMedicines();
+  const { data: medicinesData } = useMedicines({ limit: 100 });
   const medicines = medicinesData?.data ?? [];
-  const { data: patientsData } = usePatients();
+  const { data: patientsData } = usePatients({ limit: 100 });
   const patients = patientsData?.data ?? [];
   const dispense = useDispenseMedicine();
   const [medId, setMedId] = useState("");
