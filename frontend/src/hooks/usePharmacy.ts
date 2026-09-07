@@ -22,7 +22,7 @@ interface MedicinesResponse {
   meta: { total: number; page: number; limit: number; pages: number };
 }
 
-export function useMedicines(filters?: { search?: string; lowStock?: boolean; limit?: number }) {
+export function useMedicines(filters?: { search?: string; lowStock?: boolean; limit?: number; page?: number }) {
   const router = useRouter();
   return useQuery({
     queryKey: ["medicines", filters],
@@ -31,6 +31,7 @@ export function useMedicines(filters?: { search?: string; lowStock?: boolean; li
       if (filters?.search) params.search = filters.search;
       if (filters?.lowStock) params.lowStock = "true";
       if (filters?.limit) params.limit = String(Math.min(filters.limit, 100));
+      if (filters?.page) params.page = String(filters.page);
       const { data } = await apiClient.get<MedicinesResponse>("/pharmacy", { params });
       return data;
     },

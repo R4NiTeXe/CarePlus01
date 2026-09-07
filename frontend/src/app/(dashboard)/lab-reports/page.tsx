@@ -14,17 +14,19 @@ import type { ApiLabReport } from "@/hooks/useLab";
 import { FlaskConical, Clock, CheckCircle2, Printer } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getApiErrorMessage } from "@/lib/apiClient";
+import { Pager } from "@/components/shared/Pager";
 
 const STAGES: ApiLabReport["status"][] = ["Ordered", "Sample Collected", "Under Analysis", "Report Approved"];
 
 export default function LabPage() {
   const updateLabStatus = useUpdateLabStatus();
-  const { data, isLoading } = useLabReports();
-  const labs = data?.data ?? [];
   const [orderOpen, setOrderOpen] = useState(false);
   const [entry, setEntry] = useState<ApiLabReport | null>(null);
   const [print, setPrint] = useState<ApiLabReport | null>(null);
   const [advanceError, setAdvanceError] = useState("");
+  const [page, setPage] = useState(1);
+  const { data, isLoading } = useLabReports({ page });
+  const labs = data?.data ?? [];
   const [draft, setDraft] = useState<Array<{ parameter: string; value: string; unit: string; normalRange: string }>>([]);
 
   const openEntry = (lab: ApiLabReport): void => {
@@ -108,6 +110,12 @@ export default function LabPage() {
           </Card>
         ))}
       </div>
+      <Pager
+        page={data?.meta.page ?? 1}
+        pages={data?.meta.pages ?? 1}
+        total={data?.meta.total ?? 0}
+        onPage={setPage}
+      />
 
       <OrderLabModal open={orderOpen} onClose={() => setOrderOpen(false)} />
 

@@ -34,6 +34,18 @@ export async function listInventory(
   return { data: docs as unknown as (typeof db.inventory)[number][], total };
 }
 
+// Total stock value over the FULL ledger (KPIs must not sum one page).
+export async function inventoryValue(): Promise<number> {
+  if (!isDbReady()) {
+    return db.inventory.reduce((s, i) => s + i.stock * i.unitCost, 0);
+  }
+  const rows = await InventoryModel.aggregate([
+    { $group: { _id: null, v: { $sum: { $multiply: ["$stock", "$unitCost"] } } } },
+  ]).exec();
+  const first = rows[0] as { v?: number } | undefined;
+  return typeof first?.v === "number" ? first.v : 0;
+}
+
 export async function restockInventory(
   id: string,
   qty: number,

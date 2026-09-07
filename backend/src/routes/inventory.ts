@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { auditLog, requireAuth, requireRole, validate } from "../middleware.js";
-import { listInventory, restockInventory } from "../repos/inventoryRepo.js";
+import { inventoryValue, listInventory, restockInventory } from "../repos/inventoryRepo.js";
 import { ApiError } from "../errors.js";
 import { paginatedMeta, parsePagination } from "../paginate.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -16,8 +16,11 @@ router.get(
   asyncHandler(async (req, res) => {
     const { lowStock = "", category = "" } = req.query as Record<string, string>;
     const pagination = parsePagination(req.query as Record<string, string>);
-    const { data, total } = await listInventory({ lowStock, category }, pagination);
-    res.json({ data, meta: paginatedMeta(total, pagination) });
+    const [{ data, total }, value] = await Promise.all([
+      listInventory({ lowStock, category }, pagination),
+      inventoryValue(),
+    ]);
+    res.json({ data, meta: { ...paginatedMeta(total, pagination), value } });
   }),
 );
 

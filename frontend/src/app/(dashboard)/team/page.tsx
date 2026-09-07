@@ -16,6 +16,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { Pager } from "@/components/shared/Pager";
 import { useAdminResetPassword, useCreateStaffUser, useSetUserActive, useStaffUsers } from "@/hooks/useUsers";
 import { getApiErrorMessage } from "@/lib/apiClient";
 
@@ -30,7 +31,8 @@ const schema = z.object({
 type Form = z.infer<typeof schema>;
 
 export default function TeamPage() {
-  const { data, isLoading } = useStaffUsers();
+  const [page, setPage] = useState(1);
+  const { data, isLoading } = useStaffUsers(page);
   const createUser = useCreateStaffUser();
   const setActive = useSetUserActive();
   const adminReset = useAdminResetPassword();
@@ -151,6 +153,12 @@ export default function TeamPage() {
               )}
             </TableBody>
           </Table>
+          <Pager
+            page={data?.meta.page ?? 1}
+            pages={data?.meta.pages ?? 1}
+            total={data?.meta.total ?? 0}
+            onPage={setPage}
+          />
         </CardContent>
       </Card>
 

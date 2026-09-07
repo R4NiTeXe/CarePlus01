@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -12,6 +12,7 @@ import { UserRound, Plus } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
 import { AddDoctorModal } from "@/components/clinical/AddDoctorModal";
+import { Pager } from "@/components/shared/Pager";
 import "swiper/css";
 import "swiper/css/pagination";
 
@@ -21,8 +22,13 @@ export default function DoctorsPage() {
   const [dept, setDept] = useState("All");
   const [selected, setSelected] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [page, setPage] = useState(1);
 
-  const { data, isLoading } = useDoctors();
+  useEffect(() => {
+    setPage(1);
+  }, [dept]);
+
+  const { data, isLoading } = useDoctors({ page });
   const doctors = data?.data ?? [];
 
   const depts = ["All", ...Array.from(new Set(doctors.map((d) => d.department)))];
@@ -34,7 +40,7 @@ export default function DoctorsPage() {
     <div>
       <PageHeader
         title="Doctors & Clinical Desks"
-        subtitle={isLoading ? "Loading doctors…" : `${doctors.length} specialists • swipe or filter`}
+        subtitle={isLoading ? "Loading doctors…" : `${data?.meta.total ?? doctors.length} specialists • swipe or filter`}
         actions={
           <>
             <select value={dept} onChange={(e) => setDept(e.target.value)} className="rounded-lg border border-input bg-background px-3 py-2 text-sm" aria-label="Filter department">
@@ -115,6 +121,13 @@ export default function DoctorsPage() {
           </CardContent>
         </Card>
       )}
+
+      <Pager
+        page={data?.meta.page ?? 1}
+        pages={data?.meta.pages ?? 1}
+        total={data?.meta.total ?? 0}
+        onPage={setPage}
+      />
 
       <AddDoctorModal open={showAddModal} onClose={() => setShowAddModal(false)} />
     </div>

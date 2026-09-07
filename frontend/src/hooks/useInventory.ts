@@ -18,10 +18,10 @@ export interface ApiInventoryItem {
 
 interface InventoryResponse {
   data: ApiInventoryItem[];
-  meta: { total: number; page: number; limit: number; pages: number };
+  meta: { total: number; page: number; limit: number; pages: number; value?: number };
 }
 
-export function useInventory(filters?: { category?: string; lowStock?: boolean }) {
+export function useInventory(filters?: { category?: string; lowStock?: boolean; page?: number }) {
   const router = useRouter();
   return useQuery({
     queryKey: ["inventory", filters],
@@ -29,6 +29,7 @@ export function useInventory(filters?: { category?: string; lowStock?: boolean }
       const params: Record<string, string> = {};
       if (filters?.category) params.category = filters.category;
       if (filters?.lowStock) params.lowStock = "true";
+      if (filters?.page) params.page = String(filters.page);
       const { data } = await apiClient.get<InventoryResponse>("/inventory", { params });
       return data;
     },

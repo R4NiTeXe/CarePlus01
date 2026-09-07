@@ -4,13 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { useStaff } from "@/hooks/useStaff";
+// Shift-grouped board needs the whole roster at once, not one page.
+
 import type { ApiStaffMember } from "@/hooks/useStaff";
 import { cn } from "@/lib/utils";
 
 const SHIFTS = ["Morning", "Evening", "Night"] as const;
 
 export default function StaffPage() {
-  const { data, isLoading } = useStaff();
+  const { data, isLoading } = useStaff({ limit: 100 });
   const staff = data?.data ?? [];
 
   return (

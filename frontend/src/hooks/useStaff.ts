@@ -19,7 +19,7 @@ interface StaffResponse {
   meta: { total: number; page: number; limit: number; pages: number };
 }
 
-export function useStaff(filters?: { shift?: string; department?: string }) {
+export function useStaff(filters?: { shift?: string; department?: string; page?: number; limit?: number }) {
   const router = useRouter();
   return useQuery({
     queryKey: ["staff", filters],
@@ -27,6 +27,8 @@ export function useStaff(filters?: { shift?: string; department?: string }) {
       const params: Record<string, string> = {};
       if (filters?.shift) params.shift = filters.shift;
       if (filters?.department) params.department = filters.department;
+      if (filters?.page) params.page = String(filters.page);
+      if (filters?.limit) params.limit = String(Math.min(filters.limit, 100));
       const { data } = await apiClient.get<StaffResponse>("/staff", { params });
       return data;
     },

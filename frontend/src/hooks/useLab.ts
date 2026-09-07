@@ -28,7 +28,7 @@ interface LabResponse {
   meta: { total: number; page: number; limit: number; pages: number };
 }
 
-export function useLabReports(filters?: { status?: string; patientId?: string }) {
+export function useLabReports(filters?: { status?: string; patientId?: string; page?: number }) {
   const router = useRouter();
   return useQuery({
     queryKey: ["labs", filters],
@@ -36,6 +36,7 @@ export function useLabReports(filters?: { status?: string; patientId?: string })
       const params: Record<string, string> = {};
       if (filters?.status) params.status = filters.status;
       if (filters?.patientId) params.patientId = filters.patientId;
+      if (filters?.page) params.page = String(filters.page);
       const { data } = await apiClient.get<LabResponse>("/lab", { params });
       return data;
     },

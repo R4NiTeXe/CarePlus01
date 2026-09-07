@@ -33,7 +33,7 @@ interface PatientDetailResponse {
   };
 }
 
-export function usePatients(filters?: { search?: string; status?: string; bloodGroup?: string; limit?: number }) {
+export function usePatients(filters?: { search?: string; status?: string; bloodGroup?: string; limit?: number; page?: number }) {
   const router = useRouter();
   return useQuery({
     queryKey: ["patients", filters],
@@ -43,6 +43,7 @@ export function usePatients(filters?: { search?: string; status?: string; bloodG
       if (filters?.status) params.status = filters.status;
       if (filters?.bloodGroup) params.bloodGroup = filters.bloodGroup;
       if (filters?.limit) params.limit = String(Math.min(filters.limit, 100));
+      if (filters?.page) params.page = String(filters.page);
       const { data } = await apiClient.get<PatientsResponse>("/patients", { params });
       return data;
     },

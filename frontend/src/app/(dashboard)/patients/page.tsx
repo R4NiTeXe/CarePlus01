@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -20,6 +20,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { AddPatientModal } from "@/components/clinical/AddPatientModal";
 import { usePatients } from "@/hooks/usePatients";
 import type { ApiPatient } from "@/hooks/usePatients";
+import { Pager } from "@/components/shared/Pager";
 import { UserPlus } from "lucide-react";
 
 const col = createColumnHelper<ApiPatient>();
@@ -32,11 +33,17 @@ export default function PatientsPage() {
   const [addOpen, setAddOpen] = useState(false);
   const [drawerId, setDrawerId] = useState<string | null>(null);
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    setPage(1);
+  }, [query, blood, gender, admit]);
 
   const { data, isLoading } = usePatients({
     search: query || undefined,
     status: admit !== "All" ? admit : undefined,
     bloodGroup: blood !== "All" ? blood : undefined,
+    page,
   });
   const patients = useMemo(() => data?.data ?? [], [data]);
 
@@ -136,6 +143,12 @@ export default function PatientsPage() {
               </TableBody>
             </Table>
           )}
+          <Pager
+            page={data?.meta.page ?? 1}
+            pages={data?.meta.pages ?? 1}
+            total={data?.meta.total ?? 0}
+            onPage={setPage}
+          />
         </CardContent>
       </Card>
 

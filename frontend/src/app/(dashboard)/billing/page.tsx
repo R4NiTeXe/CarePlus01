@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -12,14 +12,21 @@ import { KpiCard } from "@/components/shared/KpiCard";
 import { CreateInvoiceModal } from "@/components/clinical/CreateInvoiceModal";
 import { useInvoices, useCollectPayment } from "@/hooks/useBilling";
 import type { ApiInvoice } from "@/hooks/useBilling";
+import { Pager } from "@/components/shared/Pager";
 import { formatINR } from "@/lib/utils";
 import { Wallet, HandCoins, Hourglass, ShieldCheck, Printer, Plus } from "lucide-react";
 
 export default function BillingPage() {
   const collectPayment = useCollectPayment();
-  const { data, isLoading } = useInvoices();
-  const invoices = data?.data ?? [];
+  const [page, setPage] = useState(1);
   const [filter, setFilter] = useState("All");
+
+  useEffect(() => {
+    setPage(1);
+  }, [filter]);
+
+  const { data, isLoading } = useInvoices({ page });
+  const invoices = data?.data ?? [];
   const [createOpen, setCreateOpen] = useState(false);
   const [pay, setPay] = useState<ApiInvoice | null>(null);
   const [print, setPrint] = useState<ApiInvoice | null>(null);
@@ -86,6 +93,12 @@ export default function BillingPage() {
               </TableBody>
             </Table>
           )}
+          <Pager
+            page={data?.meta.page ?? 1}
+            pages={data?.meta.pages ?? 1}
+            total={data?.meta.total ?? 0}
+            onPage={setPage}
+          />
         </CardContent>
       </Card>
 

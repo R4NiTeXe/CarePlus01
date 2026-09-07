@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -20,6 +20,7 @@ import { BookAppointmentModal } from "@/components/clinical/BookAppointmentModal
 import { TriageVitalsModal } from "@/components/clinical/TriageVitalsModal";
 import { useAppointments, useUpdateAppointmentStatus } from "@/hooks/useAppointments";
 import type { ApiAppointment } from "@/hooks/useAppointments";
+import { Pager } from "@/components/shared/Pager";
 import { CalendarPlus, Stethoscope } from "lucide-react";
 
 const col = createColumnHelper<ApiAppointment>();
@@ -33,12 +34,18 @@ export default function AppointmentsPage() {
   const [status, setStatus] = useState("All");
   const [bookOpen, setBookOpen] = useState(false);
   const [vitalsOpen, setVitalsOpen] = useState(false);
+  const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    setPage(1);
+  }, [query, dept, priority, status]);
 
   const { data, isLoading } = useAppointments({
     status: status !== "All" ? status : undefined,
     department: dept !== "All" ? dept : undefined,
     priority: priority !== "All" ? priority : undefined,
     search: query || undefined,
+    page,
   });
   const appointments = useMemo(() => data?.data ?? [], [data]);
 
@@ -170,6 +177,12 @@ export default function AppointmentsPage() {
               </TableBody>
             </Table>
           )}
+          <Pager
+            page={data?.meta.page ?? 1}
+            pages={data?.meta.pages ?? 1}
+            total={data?.meta.total ?? 0}
+            onPage={setPage}
+          />
         </CardContent>
       </Card>
       <BookAppointmentModal open={bookOpen} onClose={() => setBookOpen(false)} />

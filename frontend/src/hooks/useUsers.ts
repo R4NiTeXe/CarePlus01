@@ -27,12 +27,14 @@ function handle401(router: ReturnType<typeof useRouter>, error: unknown): boolea
   return false;
 }
 
-export function useStaffUsers() {
+export function useStaffUsers(page?: number) {
   const router = useRouter();
   return useQuery({
-    queryKey: ["staff-users"],
+    queryKey: ["staff-users", page ?? 1],
     queryFn: async () => {
-      const { data } = await apiClient.get<UsersResponse>("/users");
+      const params: Record<string, string> = {};
+      if (page) params.page = String(page);
+      const { data } = await apiClient.get<UsersResponse>("/users", { params });
       return data;
     },
     retry: false,

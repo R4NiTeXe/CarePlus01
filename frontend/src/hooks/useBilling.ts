@@ -34,7 +34,7 @@ interface InvoicesResponse {
   };
 }
 
-export function useInvoices(filters?: { status?: string; patientId?: string }) {
+export function useInvoices(filters?: { status?: string; patientId?: string; page?: number }) {
   const router = useRouter();
   return useQuery({
     queryKey: ["invoices", filters],
@@ -42,6 +42,7 @@ export function useInvoices(filters?: { status?: string; patientId?: string }) {
       const params: Record<string, string> = {};
       if (filters?.status) params.status = filters.status;
       if (filters?.patientId) params.patientId = filters.patientId;
+      if (filters?.page) params.page = String(filters.page);
       const { data } = await apiClient.get<InvoicesResponse>("/billing", { params });
       return data;
     },

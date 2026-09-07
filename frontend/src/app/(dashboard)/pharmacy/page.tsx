@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,6 +14,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { KpiCard } from "@/components/shared/KpiCard";
 import { DispenseModal } from "@/components/clinical/DispenseModal";
 import { useMedicines, useCreateMedicine } from "@/hooks/usePharmacy";
+import { Pager } from "@/components/shared/Pager";
 import { formatINR } from "@/lib/utils";
 import { Pill, TriangleAlert, CalendarClock, Plus } from "lucide-react";
 
@@ -36,11 +37,17 @@ function daysToExpiry(expiry: string): number {
 
 export default function PharmacyPage() {
   const createMedicine = useCreateMedicine();
-  const { data, isLoading } = useMedicines();
-  const medicines = useMemo(() => data?.data ?? [], [data]);
+  const [page, setPage] = useState(1);
   const [query, setQuery] = useState("");
   const [dispenseOpen, setDispenseOpen] = useState(false);
   const [batchOpen, setBatchOpen] = useState(false);
+
+  useEffect(() => {
+    setPage(1);
+  }, [query]);
+
+  const { data, isLoading } = useMedicines({ page });
+  const medicines = useMemo(() => data?.data ?? [], [data]);
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<Form>({ resolver: zodResolver(schema) });
 
   const sorted = useMemo(
@@ -117,6 +124,12 @@ export default function PharmacyPage() {
               </TableBody>
             </Table>
           )}
+          <Pager
+            page={data?.meta.page ?? 1}
+            pages={data?.meta.pages ?? 1}
+            total={data?.meta.total ?? 0}
+            onPage={setPage}
+          />
         </CardContent>
       </Card>
       <DispenseModal open={dispenseOpen} onClose={() => setDispenseOpen(false)} />

@@ -1,18 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { KpiCard } from "@/components/shared/KpiCard";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { useInventory } from "@/hooks/useInventory";
+import { Pager } from "@/components/shared/Pager";
 import { Boxes, TriangleAlert, IndianRupee } from "lucide-react";
 
 export default function InventoryPage() {
-  const { data, isLoading } = useInventory();
+  const [page, setPage] = useState(1);
+  const { data, isLoading } = useInventory({ page });
   const items = data?.data ?? [];
   const low = items.filter((i) => i.stock <= i.minThreshold);
-  const value = items.reduce((s, i) => s + i.stock * i.unitCost, 0);
+  const value = data?.meta.value ?? items.reduce((s, i) => s + i.stock * i.unitCost, 0);
 
   return (
     <div>
@@ -52,6 +55,12 @@ export default function InventoryPage() {
               </TableBody>
             </Table>
           )}
+          <Pager
+            page={data?.meta.page ?? 1}
+            pages={data?.meta.pages ?? 1}
+            total={data?.meta.total ?? 0}
+            onPage={setPage}
+          />
         </CardContent>
       </Card>
     </div>

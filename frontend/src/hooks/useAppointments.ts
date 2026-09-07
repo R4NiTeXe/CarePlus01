@@ -25,7 +25,7 @@ interface AppointmentsResponse {
   meta: { total: number; page: number; limit: number; pages: number };
 }
 
-export function useAppointments(filters?: { status?: string; department?: string; priority?: string; search?: string }) {
+export function useAppointments(filters?: { status?: string; department?: string; priority?: string; search?: string; page?: number }) {
   const router = useRouter();
   return useQuery({
     queryKey: ["appointments", filters],
@@ -35,6 +35,7 @@ export function useAppointments(filters?: { status?: string; department?: string
       if (filters?.department) params.department = filters.department;
       if (filters?.priority) params.priority = filters.priority;
       if (filters?.search) params.search = filters.search;
+      if (filters?.page) params.page = String(filters.page);
       const { data } = await apiClient.get<AppointmentsResponse>("/appointments", { params });
       return data;
     },
