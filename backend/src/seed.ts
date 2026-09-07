@@ -14,7 +14,7 @@ import { AuditModel } from "./models/Audit.js";
 import { UserModel } from "./models/User.js";
 import { HospitalSettingsModel } from "./models/HospitalSettings.js";
 import { hashPassword } from "./repos/userRepo.js";
-import { ID_SPECS, syncCounter } from "./repos/counterRepo.js";
+import { ID_SPECS, invoiceSpec, syncCounter } from "./repos/counterRepo.js";
 
 async function upsertAll<T extends { id: string }>(
   model: {
@@ -69,7 +69,7 @@ async function main(): Promise<void> {
     db.appointments.map((a) => a.id),
   );
   await syncCounter(
-    ID_SPECS.invoice,
+    invoiceSpec(),
     db.invoices.map((i) => i.id),
   );
   await syncCounter(

@@ -15,7 +15,7 @@ import { StaffModel } from "../src/models/Staff.js";
 import { AuditModel } from "../src/models/Audit.js";
 import { UserModel } from "../src/models/User.js";
 import { hashPassword } from "../src/repos/userRepo.js";
-import { ID_SPECS, syncCounter } from "../src/repos/counterRepo.js";
+import { ID_SPECS, invoiceSpec, syncCounter } from "../src/repos/counterRepo.js";
 
 export const TEST_PASSWORD = "Test@1234";
 
@@ -69,7 +69,7 @@ beforeAll(async () => {
     db.appointments.map((a) => a.id),
   );
   await syncCounter(
-    ID_SPECS.invoice,
+    invoiceSpec(),
     db.invoices.map((i) => i.id),
   );
   await syncCounter(

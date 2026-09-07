@@ -11,11 +11,16 @@ export interface IdSpec {
 export const ID_SPECS: Record<string, IdSpec> = {
   patient: { key: "patient", prefix: "CP-", pad: 4, start: 1001 },
   appointment: { key: "appointment", prefix: "APT-", pad: 4, start: 1255 },
-  invoice: { key: "invoice", prefix: "INV-2025-", pad: 3, start: 0 },
   medicine: { key: "medicine", prefix: "MED-", pad: 3, start: 0 },
   lab: { key: "lab", prefix: "LAB-", pad: 4, start: 2001 },
   doctor: { key: "doctor", prefix: "DOC-", pad: 3, start: 100 },
 };
+
+// Invoices carry the calendar year (INV-2026-001). The counter key stays
+// constant so the sequence continues across New Year; only the prefix rolls.
+export function invoiceSpec(): IdSpec {
+  return { key: "invoice", prefix: `INV-${new Date().getFullYear()}-`, pad: 3, start: 0 };
+}
 
 const initialized = new Set<string>();
 

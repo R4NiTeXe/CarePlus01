@@ -1,6 +1,6 @@
 import { InvoiceModel } from "../models/Invoice.js";
 import { db } from "../store.js";
-import { ID_SPECS, nextId } from "./counterRepo.js";
+import { invoiceSpec, nextId } from "./counterRepo.js";
 import { paginateArray, sanitizeSort, type Pagination } from "../paginate.js";
 import { billTotals } from "../utils/money.js";
 import { isDbReady } from "../db.js";
@@ -73,7 +73,7 @@ export async function createInvoice(data: {
   if (!isDbReady()) {
     const inv = {
       ...data,
-      id: `INV-2025-${String(db.invoices.length + 1).padStart(3, "0")}`,
+      id: `${invoiceSpec().prefix}${String(db.invoices.length + 1).padStart(3, "0")}`,
       date: new Date().toISOString().slice(0, 10),
       paidAmount: 0,
       balanceDue: data.totalAmount,
@@ -84,7 +84,7 @@ export async function createInvoice(data: {
   }
   const payload = {
     ...data,
-    id: await nextId(ID_SPECS.invoice),
+    id: await nextId(invoiceSpec()),
     date: new Date().toISOString().slice(0, 10),
     paidAmount: 0,
     balanceDue: data.totalAmount,
