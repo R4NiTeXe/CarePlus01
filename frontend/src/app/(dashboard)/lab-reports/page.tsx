@@ -148,7 +148,7 @@ export default function LabPage() {
           {print && (
             <div className="grid gap-2 text-sm">
               <div className="border-b pb-2 text-center">
-                <p className="text-lg font-bold text-[#103B36]">CarePlus Hospital — Dept. of Pathology</p>
+                <p className="text-lg font-bold text-[#103B36] dark:text-foreground">CarePlus Hospital — Dept. of Pathology</p>
                 <p className="text-xs text-muted-foreground">NABL Accredited • {print.id} • {print.orderDate}</p>
               </div>
               <p><span className="text-muted-foreground">Patient:</span> {print.patientName} ({print.patientId})</p>

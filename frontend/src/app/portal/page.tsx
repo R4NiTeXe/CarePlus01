@@ -56,7 +56,7 @@ const DESKS = [
 
 export default function PortalPage() {
   return (
-    <div className="min-h-screen bg-canvas">
+    <div className="light min-h-screen bg-canvas" style={{ colorScheme: "light" }}>
       <header className="border-b border-border bg-white/85 backdrop-blur-md">
         <div className="mx-auto flex h-16 w-full max-w-5xl items-center gap-3 px-4">
           <Button asChild variant="ghost" size="sm">

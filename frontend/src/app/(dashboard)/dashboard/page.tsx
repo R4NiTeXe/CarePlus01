@@ -93,7 +93,7 @@ export default function DashboardPage() {
               <circle cx="50" cy="50" r="44" fill="none" stroke="#e9eef4" strokeWidth="10" />
               <circle cx="50" cy="50" r="44" fill="none" stroke="#0E5B53" strokeWidth="10" strokeLinecap="round"
                 strokeDasharray={circ} strokeDashoffset={circ - (circ * occupancy) / 100} transform="rotate(-90 50 50)" />
-              <text x="50" y="55" textAnchor="middle" fontSize="18" fontWeight="700" fill="#103B36">
+              <text x="50" y="55" textAnchor="middle" fontSize="18" fontWeight="700" className="fill-[#103B36] dark:fill-[#EDE8DC]">
                 <AnimatedNumber value={occupancy} format={(n) => `${Math.round(n)}%`} />
               </text>
             </svg>

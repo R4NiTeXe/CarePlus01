@@ -3,7 +3,10 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
+  /* .light pins a subtree (marketing, portal) to the light theme even when
+     the OS requests dark mode — those pages are designed light-only. */
+  :root,
+  .light {
     --background: 36 43% 96%;
     --foreground: 171 17% 14%;
     --card: 0 0% 100%;
@@ -53,7 +56,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-canvas text-foreground antialiased;
+    @apply bg-background text-foreground antialiased;
     font-family: Inter, system-ui, -apple-system, sans-serif;
   }
 }

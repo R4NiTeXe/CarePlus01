@@ -33,6 +33,11 @@ export default function SettingsPage() {
   const [opdNote, setOpdNote] = useState(settings.opdHoursNote);
   const [saved, setSaved] = useState(false);
   const [dirty, setDirty] = useState(false);
+  // Theme resolves client-side only — same mount guard as the landing toggle.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     setName(settings.hospitalName);
@@ -70,8 +75,8 @@ export default function SettingsPage() {
           <CardContent className="grid gap-3">
             <div className="grid gap-1 text-sm">Theme
               <div className="flex items-center gap-2 rounded-lg border px-3 py-2">
-                <Switch checked={theme === "dark"} onCheckedChange={(v) => setTheme(v ? "dark" : "light")} aria-label="Dark mode" />
-                <span>{theme === "dark" ? "Dark" : "Light"}</span>
+                <Switch checked={mounted && theme === "dark"} onCheckedChange={(v) => setTheme(v ? "dark" : "light")} aria-label="Dark mode" />
+                <span>{mounted && theme === "dark" ? "Dark" : "Light"}</span>
               </div>
             </div>
             <div className="grid gap-2 text-sm">
