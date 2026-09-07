@@ -13,6 +13,8 @@ import { StaffModel } from "./models/Staff.js";
 import { AuditModel } from "./models/Audit.js";
 import { UserModel } from "./models/User.js";
 import { HospitalSettingsModel } from "./models/HospitalSettings.js";
+import { SessionModel } from "./models/Session.js";
+import { CounterModel } from "./models/Counter.js";
 import { hashPassword } from "./repos/userRepo.js";
 import { ID_SPECS, invoiceSpec, syncCounter } from "./repos/counterRepo.js";
 
@@ -40,16 +42,57 @@ async function upsertAll<T extends { id: string }>(
   console.log(`${label}: ${inserted} inserted, ${matched} already present`);
 }
 
+const day = (offset: number): string => {
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return d.toISOString().slice(0, 10);
+};
+
+async function wipeDatabase(): Promise<void> {
+  // Explicit allowlist — only CarePlus collections, never anything else.
+  const models: Array<{ deleteMany: (filter: object) => Promise<unknown> }> = [
+    PatientModel,
+    AppointmentModel,
+    BedModel,
+    MedicineModel,
+    LabModel,
+    InvoiceModel,
+    DoctorModel,
+    DepartmentModel,
+    InventoryModel,
+    StaffModel,
+    AuditModel,
+    UserModel,
+    SessionModel,
+    CounterModel,
+    HospitalSettingsModel,
+  ];
+  for (const m of models) {
+    await m.deleteMany({});
+  }
+  console.log("database wiped (CarePlus collections only)");
+}
+
 async function main(): Promise<void> {
   await connectDB();
+  if (process.env.SEED_WIPE === "true") {
+    await wipeDatabase();
+  }
   console.log("seeding careplus database...");
 
+  // Demo dates stay fresh: appointments today, reports/bills yesterday,
+  // admissions a few days back — no matter when seeding runs.
+  const appointments = db.appointments.map((a) => ({ ...a, date: day(0) }));
+  const labs = db.labs.map((l) => ({ ...l, orderDate: day(-1) }));
+  const invoices = db.invoices.map((i) => ({ ...i, date: day(-1) }));
+  const beds = db.beds.map((b) => (b.admittedDate ? { ...b, admittedDate: day(-3) } : b));
+
   await upsertAll(PatientModel, db.patients, "patients");
-  await upsertAll(AppointmentModel, db.appointments, "appointments");
-  await upsertAll(BedModel, db.beds, "beds");
+  await upsertAll(AppointmentModel, appointments, "appointments");
+  await upsertAll(BedModel, beds, "beds");
   await upsertAll(MedicineModel, db.medicines, "medicines");
-  await upsertAll(LabModel, db.labs, "lab reports");
-  await upsertAll(InvoiceModel, db.invoices, "invoices");
+  await upsertAll(LabModel, labs, "lab reports");
+  await upsertAll(InvoiceModel, invoices, "invoices");
   await upsertAll(DoctorModel, db.doctors, "doctors");
   await upsertAll(DepartmentModel, db.departments, "departments");
   await upsertAll(InventoryModel, db.inventory, "inventory");
@@ -82,9 +125,10 @@ async function main(): Promise<void> {
   );
   console.log("counters synced");
 
-  // Demo staff logins (dev only) — created once, skipped when present so real
-  // passwords are never overwritten. mustChangePassword forces replacement at
-  // first sign-in, which now works via the public /change-password page.
+  // Demo staff logins (project demo only) — created once, skipped when present
+  // so real passwords are never overwritten. Frictionless sign-in (no forced
+  // change) so an interviewer can explore every desk immediately; the
+  // forced-change flow stays demoable via Team → Temp password.
   const demoStaff = [
     {
       email: "doctor@careplus.local",
@@ -116,11 +160,11 @@ async function main(): Promise<void> {
         passwordHash: await hashPassword(s.password),
         role: s.role,
         isActive: true,
-        mustChangePassword: true,
+        mustChangePassword: false,
         securityQuestion: "What city were you born in?",
         securityAnswerHash: await hashPassword(`careplus-${s.role.toLowerCase()}`),
       });
-      console.log(`demo staff created: ${s.email} (temporary password, change at first sign-in)`);
+      console.log(`demo staff created: ${s.email} / ${s.password}`);
     }
   }
 
@@ -131,9 +175,9 @@ async function main(): Promise<void> {
       $setOnInsert: {
         key: "hospital",
         hospitalName: "CarePlus Multi-Speciality Hospital",
-        contactPhone: "",
-        contactPhoneHref: "",
-        address: "",
+        contactPhone: "+91 98765 43210",
+        contactPhoneHref: "919876543210",
+        address: "12 MG Road, Medical District",
         opdHoursNote: "OPD Mon–Sat, 9 AM – 5 PM • Emergency wing never closes",
         slotMinutes: 30,
       },

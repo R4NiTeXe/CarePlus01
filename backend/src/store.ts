@@ -313,6 +313,18 @@ const medicines: Medicine[] = [
     status: "Healthy",
   },
   {
+    id: "MED-003",
+    brandName: "Azithral 500",
+    genericName: "Azithromycin 500mg",
+    category: "Antibiotic",
+    batchNo: "B-2024-098",
+    expiryDate: "2025-06-30",
+    unitPrice: 12.4,
+    stockCount: 15,
+    minThreshold: 40,
+    status: "Expired",
+  },
+  {
     id: "MED-004",
     brandName: "Telma 40",
     genericName: "Telmisartan 40mg",
@@ -402,7 +414,7 @@ const labs: LabReport[] = [
 
 const invoices: Invoice[] = [
   {
-    id: "INV-2025-001",
+    id: "INV-2026-001",
     patientId: "CP-1001",
     patientName: "Rahul Sharma",
     date: "2026-09-03",
@@ -420,7 +432,7 @@ const invoices: Invoice[] = [
     status: "Paid",
   },
   {
-    id: "INV-2025-002",
+    id: "INV-2026-002",
     patientId: "CP-1005",
     patientName: "Vikram Mehta",
     date: "2026-09-03",
