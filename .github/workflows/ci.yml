@@ -2,7 +2,8 @@ name: CI
 
 # Delivery model: Vercel auto-deploys `frontend/` and Render auto-deploys
 # `backend/` on every push to main. This workflow is the quality gate in
-# front of both — nothing merges or deploys unless every step below passes.
+# front of both — each job below shows its own ✅/❌ symbol on the commit,
+# and the `report` job prints the full scoreboard.
 
 on:
   push:
@@ -13,9 +14,48 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  checks:
+  format:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
+
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        pkg: ["@careplus/backend", "@careplus/frontend"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint -w ${{ matrix.pkg }}
+
+  typecheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     services:
       mongo:
         image: mongo:7
@@ -30,40 +70,35 @@ jobs:
       MONGODB_URI: mongodb://localhost:27017/careplus
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
+      - run: npm ci
+      - run: npm run test -w @careplus/backend
 
-      - name: Install
-        run: npm ci
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
 
-      - name: Format check
-        run: npm run format:check
-
-      - name: Lint backend
-        run: npm run lint -w @careplus/backend
-
-      - name: Lint frontend
-        run: npm run lint -w @careplus/frontend
-
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Test backend
-        run: npm run test -w @careplus/backend
-
-      # Advisory only: surfaces new CVEs in the log without failing the
-      # build on pre-existing moderate advisories. Promote to a hard gate
-      # (remove continue-on-error) once the baseline is clean.
-      - name: Dependency audit
-        run: npm audit --omit=dev --audit-level=high
-        continue-on-error: true
-
-      - name: Build
-        run: npm run build
-
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
       - name: Contract check
         run: |
           npm run build -w @careplus/backend
@@ -79,3 +114,40 @@ jobs:
           node -e "const fs=require('fs');for(const f of ['/tmp/live.json','docs/openapi.snapshot.json']){fs.writeFileSync(f+'.canon',JSON.stringify(JSON.parse(fs.readFileSync(f,'utf8')))+'\n')}"
           diff -u docs/openapi.snapshot.json.canon /tmp/live.json.canon || (echo "::error::OpenAPI contract changed — regenerate the snapshot against a running API and commit" && kill $API_PID && exit 1)
           kill $API_PID || true
+
+  # Advisory only: surfaces new CVEs without failing the build.
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm audit --omit=dev --audit-level=high
+
+  # ✅/❌ scoreboard printed on every run — the symbol summary you asked for.
+  report:
+    if: always()
+    needs: [format, lint, typecheck, test, build, contract]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Scoreboard
+        run: |
+          symbol() { [ "$1" = "success" ] && echo "✅" || echo "❌"; }
+          {
+            echo "## CI scoreboard for \`${{ github.sha }}\`"
+            echo ""
+            echo "| Check | Result |"
+            echo "|-------|--------|"
+            echo "| Format | $(symbol '${{ needs.format.result }}') ${{ needs.format.result }} |"
+            echo "| Lint | $(symbol '${{ needs.lint.result }}') ${{ needs.lint.result }} |"
+            echo "| Typecheck | $(symbol '${{ needs.typecheck.result }}') ${{ needs.typecheck.result }} |"
+            echo "| Tests | $(symbol '${{ needs.test.result }}') ${{ needs.test.result }} |"
+            echo "| Build | $(symbol '${{ needs.build.result }}') ${{ needs.build.result }} |"
+            echo "| Contract | $(symbol '${{ needs.contract.result }}') ${{ needs.contract.result }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
