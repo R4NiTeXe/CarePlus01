@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -24,6 +25,8 @@ import {
   ClipboardCheck,
   Pill,
   Siren,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { useHospitalSettings } from "@/hooks/useHospitalSettings";
 import { SafeImage } from "@/components/shared/SafeImage";
@@ -93,6 +96,15 @@ const CARTOONS = [
   { src: "/images/cartoons/cartoon-healthy-kids.jpg", alt: "Happy cartoon kids playing in a park", caption: "Back to play in no time" },
 ];
 
+const DEMO_LOGINS = [
+  { role: "Admin", slug: "admin", email: "admin@careplus.local", password: "Admin@123", see: "Full dashboard, staff accounts, audit trail, hospital settings" },
+  { role: "Doctor", slug: "doctor", email: "doctor@careplus.local", password: "Doctor@123", see: "OPD queue, consults, lab orders, patient charts" },
+  { role: "Nurse", slug: "nurse", email: "nurse@careplus.local", password: "Nurse@123", see: "Triage desk, vitals, appointments, bed board" },
+  { role: "Pharmacist", slug: "pharmacist", email: "pharma@careplus.local", password: "Pharma@123", see: "Dispense queue, batches, stock alerts, inventory" },
+  { role: "Lab Tech", slug: "labtech", email: "lab@careplus.local", password: "Lab@1234", see: "4-stage pipeline, result entry, report approval" },
+  { role: "Cashier", slug: "cashier", email: "cashier@careplus.local", password: "Cashier@123", see: "Invoices, collections, TPA claims, receipts" },
+];
+
 const TESTIMONIALS = [
   { quote: "My mother's knee surgery to discharge took four days. The token system meant we never waited more than ten minutes.", name: "R. Banerjee", detail: "Orthopedics patient family" },
   { quote: "Blood tests at 9 AM, doctor consult at 11 with reports in hand. Everything under one roof genuinely works.", name: "S. Iyer", detail: "General Medicine OPD" },
@@ -123,6 +135,13 @@ export default function LandingPage() {
   // null = still loading, true = at least one request failed
   const [loadError, setLoadError] = useState<boolean | null>(null);
   const { settings } = useHospitalSettings();
+  const { theme, setTheme } = useTheme();
+  // next-themes resolves only on the client — rendering the icon before mount
+  // hydrates Moon on the server and Sun on dark clients (mismatch crash).
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const hasPhone = Boolean(settings.contactPhoneHref && settings.contactPhone);
 
   useEffect(() => {
@@ -139,8 +158,26 @@ export default function LandingPage() {
     })();
   }, []);
 
+  // Structured data: tells Google this is a hospital (rich results, map
+  // listings). Only includes fields the hospital has actually filled in.
+  const jsonLd: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Hospital",
+    name: settings.hospitalName,
+    medicalSpecialty: departments.map((d) => d.name),
+    ...(settings.address ? { address: settings.address } : {}),
+    ...(hasPhone ? { telephone: settings.contactPhone } : {}),
+    openingHours: settings.opdHoursNote,
+    department: doctors.slice(0, 3).map((d) => ({
+      "@type": "Physician",
+      name: d.name,
+      medicalSpecialty: d.department,
+    })),
+  };
+
   return (
     <div className="min-h-screen bg-canvas text-foreground">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       {/* Emergency strip */}
       {hasPhone && (
         <div className="bg-red-700 text-white">
@@ -155,19 +192,27 @@ export default function LandingPage() {
       )}
 
       {/* Header */}
-      <header className="sticky top-0 z-30 border-b border-border bg-white/85 backdrop-blur-md">
+      <header className="sticky top-0 z-30 border-b border-border bg-white/85 backdrop-blur-md dark:bg-card/85">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-3 px-4">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-navy">
             <HeartPulse className="h-5 w-5 animate-pulse text-accent" />
           </span>
           <div className="leading-tight">
-            <p className="font-bold text-navy">CarePlus Hospital</p>
+            <p className="font-bold text-foreground">CarePlus Hospital</p>
             <p className="text-xs text-muted-foreground">Multi-Speciality Care</p>
           </div>
           <div className="flex-1" />
-          <a href="#departments" className="hidden text-sm font-medium text-muted-foreground hover:text-navy sm:block">Departments</a>
-          <a href="#doctors" className="hidden text-sm font-medium text-muted-foreground hover:text-navy sm:block">Doctors</a>
-          <a href="#visit" className="hidden text-sm font-medium text-muted-foreground hover:text-navy sm:block">Visit</a>
+          <a href="#departments" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground sm:block">Departments</a>
+          <a href="#doctors" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground sm:block">Doctors</a>
+          <a href="#visit" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground sm:block">Visit</a>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Toggle color theme"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          >
+            {mounted && theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
           <Button asChild size="sm">
             <Link href="/portal"><UserRound className="mr-1.5 h-4 w-4" />Staff Portal</Link>
           </Button>
@@ -199,7 +244,15 @@ export default function LandingPage() {
             strokeLinecap="round"
           />
         </svg>
-        <div className="relative mx-auto grid w-full max-w-6xl gap-10 px-4 py-16 md:grid-cols-2 md:py-24">
+        <div className="relative mx-auto w-full max-w-6xl px-4 py-14 md:py-20">
+          <motion.div {...fadeUp} className="overflow-hidden rounded-2xl border border-white/10 shadow-card">
+            <SafeImage
+              src="/images/hero-care-team.jpg"
+              alt="Doctor and nurse smiling with a patient in a bright hospital corridor"
+              className="aspect-[16/10] w-full object-[center_25%] sm:aspect-[16/9]"
+            />
+          </motion.div>
+          <div className="mt-8 grid gap-10 md:grid-cols-2">
           <motion.div {...fadeUp}>
             <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-accent">
               <span className="h-2 w-2 animate-pulse rounded-full bg-accent" />
@@ -239,13 +292,6 @@ export default function LandingPage() {
             </div>
           </motion.div>
           <motion.div {...fadeUp} className="grid content-center gap-4">
-            <div className="overflow-hidden rounded-2xl border border-white/10 shadow-card">
-              <SafeImage
-                src="/images/hero-care-team.jpg"
-                alt="Doctor and nurse smiling with a patient in a bright hospital corridor"
-                className="aspect-[16/9] w-full"
-              />
-            </div>
             <div className="grid grid-cols-3 gap-4">
               <Card className="border-white/10 bg-white/5 text-center text-white">
                 <CardContent className="p-4">
@@ -273,13 +319,14 @@ export default function LandingPage() {
               </CardContent>
             </Card>
           </motion.div>
+          </div>
         </div>
       </section>
 
       {/* How it works */}
       <section className="mx-auto w-full max-w-6xl px-4 py-14">
         <motion.div {...fadeUp}>
-          <h2 className="text-2xl font-bold text-navy">Your visit, in three steps</h2>
+          <h2 className="text-2xl font-bold text-foreground">Your visit, in three steps</h2>
           <p className="mt-1 text-sm text-muted-foreground">The same token system our staff uses every day.</p>
         </motion.div>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
@@ -291,7 +338,7 @@ export default function LandingPage() {
                     <span className="flex h-9 w-9 items-center justify-center rounded-full bg-navy text-sm font-bold text-accent">
                       {i + 1}
                     </span>
-                    <s.icon className="h-5 w-5 text-clinical" />
+                    <s.icon className="h-5 w-5 text-clinical dark:text-[#7FD8BE]" />
                   </span>
                   <CardTitle className="pt-2 text-base">{s.title}</CardTitle>
                 </CardHeader>
@@ -303,10 +350,10 @@ export default function LandingPage() {
       </section>
 
       {/* Departments */}
-      <section id="departments" className="border-y border-border bg-white">
+      <section id="departments" className="border-y border-border bg-card">
         <div className="mx-auto w-full max-w-6xl scroll-mt-20 px-4 py-14">
           <motion.div {...fadeUp}>
-            <h2 className="text-2xl font-bold text-navy">Centres of excellence</h2>
+            <h2 className="text-2xl font-bold text-foreground">Centres of excellence</h2>
             <p className="mt-1 text-sm text-muted-foreground">Led by senior consultants, backed by in-house diagnostics.</p>
           </motion.div>
           {loadError === true && departments.length === 0 && (
@@ -323,7 +370,7 @@ export default function LandingPage() {
                 <motion.div key={d.id} {...fadeUp}>
                   <Card className="h-full rounded-2xl shadow-card transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
                     <CardHeader className="flex flex-row items-center gap-3 pb-2">
-                      <span className="rounded-xl bg-clinical/10 p-2.5 text-clinical">
+                      <span className="rounded-xl bg-clinical/10 p-2.5 text-clinical dark:text-[#7FD8BE]">
                         <Icon className="h-5 w-5" />
                       </span>
                       <CardTitle className="text-lg">{d.name}</CardTitle>
@@ -343,7 +390,7 @@ export default function LandingPage() {
       {/* Doctors */}
       <section id="doctors" className="mx-auto w-full max-w-6xl scroll-mt-20 px-4 py-14">
         <motion.div {...fadeUp}>
-          <h2 className="text-2xl font-bold text-navy">Meet our specialists</h2>
+          <h2 className="text-2xl font-bold text-foreground">Meet our specialists</h2>
           <p className="mt-1 text-sm text-muted-foreground">The consultants leading our OPDs this week.</p>
         </motion.div>
         {loadError === true && doctors.length === 0 && (
@@ -365,7 +412,7 @@ export default function LandingPage() {
                   <p className="text-sm text-muted-foreground">{d.qualification}</p>
                 </CardHeader>
                 <CardContent className="text-sm">
-                  <span className="font-medium text-clinical">{d.department}</span>
+                  <span className="font-medium text-clinical dark:text-[#7FD8BE]">{d.department}</span>
                   <span className="mx-2 text-border">•</span>Room {d.roomNo}
                 </CardContent>
               </Card>
@@ -375,10 +422,10 @@ export default function LandingPage() {
       </section>
 
       {/* Inside CarePlus — real moments, real wards */}
-      <section className="border-y border-border bg-white">
+      <section className="border-y border-border bg-card">
         <div className="mx-auto w-full max-w-6xl px-4 py-14">
           <motion.div {...fadeUp}>
-            <h2 className="text-2xl font-bold text-navy">Inside CarePlus</h2>
+            <h2 className="text-2xl font-bold text-foreground">Inside CarePlus</h2>
             <p className="mt-1 text-sm text-muted-foreground">The people and places behind the care.</p>
           </motion.div>
           <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -391,7 +438,7 @@ export default function LandingPage() {
                     className="aspect-[4/3] w-full transition-transform duration-300 group-hover:scale-105"
                   />
                 </div>
-                <figcaption className="bg-white px-3 py-2 text-xs font-medium text-muted-foreground">
+                <figcaption className="bg-card px-3 py-2 text-xs font-medium text-muted-foreground">
                   {g.caption}
                 </figcaption>
               </motion.figure>
@@ -401,11 +448,11 @@ export default function LandingPage() {
       </section>
 
       {/* Kids Corner — friendly cartoons for little patients (static, no animation) */}
-      <section className="border-y border-border bg-white">
+      <section className="border-y border-border bg-card">
         <div className="mx-auto w-full max-w-6xl px-4 py-14">
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-clinical">Kids Corner</p>
-            <h2 className="mt-1 text-2xl font-bold text-navy">Hospital feels less scary with friends</h2>
+            <p className="text-xs font-bold uppercase tracking-widest text-clinical dark:text-[#7FD8BE]">Kids Corner</p>
+            <h2 className="mt-1 text-2xl font-bold text-foreground">Hospital feels less scary with friends</h2>
             <p className="mt-1 text-sm text-muted-foreground">Meet the buddies waiting for you in our pediatric ward.</p>
           </div>
           <div className="mt-6 overflow-hidden rounded-2xl shadow-card">
@@ -417,7 +464,7 @@ export default function LandingPage() {
           </div>
           <div className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
             {CARTOONS.slice(0, 4).map((c) => (
-              <figure key={c.src} className="overflow-hidden rounded-2xl bg-canvas shadow-card">
+              <figure key={c.src} className="overflow-hidden rounded-2xl bg-card shadow-card">
                 <SafeImage src={c.src} alt={c.alt} className="aspect-square w-full" />
                 <figcaption className="px-3 py-2 text-center text-xs font-medium text-muted-foreground">
                   {c.caption}
@@ -432,14 +479,14 @@ export default function LandingPage() {
       <section>
         <div className="mx-auto w-full max-w-6xl px-4 py-14">
           <motion.div {...fadeUp}>
-            <h2 className="text-2xl font-bold text-navy">Why choose CarePlus</h2>
+            <h2 className="text-2xl font-bold text-foreground">Why choose CarePlus</h2>
           </motion.div>
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {WHY_US.map((w) => (
               <motion.div key={w.title} {...fadeUp}>
                 <Card className="h-full rounded-2xl shadow-card">
                   <CardHeader className="pb-2">
-                    <span className="w-fit rounded-xl bg-clinical/10 p-2 text-clinical">
+                    <span className="w-fit rounded-xl bg-clinical/10 p-2 text-clinical dark:text-[#7FD8BE]">
                       <w.icon className="h-5 w-5" />
                     </span>
                     <CardTitle className="text-base">{w.title}</CardTitle>
@@ -455,7 +502,7 @@ export default function LandingPage() {
       {/* Testimonials */}
       <section className="mx-auto w-full max-w-6xl px-4 py-14">
         <motion.div {...fadeUp}>
-          <h2 className="text-2xl font-bold text-navy">Families trust us</h2>
+          <h2 className="text-2xl font-bold text-foreground">Families trust us</h2>
           <p className="mt-1 text-sm text-muted-foreground">Shared with permission by our patients.</p>
         </motion.div>
         <div className="mt-6 grid gap-4 md:grid-cols-3">
@@ -473,6 +520,38 @@ export default function LandingPage() {
               </Card>
             </motion.div>
           ))}
+        </div>
+      </section>
+
+      {/* Live demo access — interviewers explore every desk with one click */}
+      <section className="border-y border-border bg-white">
+        <div className="mx-auto w-full max-w-6xl px-4 py-14">
+          <motion.div {...fadeUp}>
+            <p className="text-xs font-bold uppercase tracking-widest text-clinical dark:text-[#7FD8BE]">Live demo</p>
+            <h2 className="mt-1 text-2xl font-bold text-foreground">Step inside any desk</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              This site runs on demo data. Pick a role and sign in with the account shown — no registration needed.
+            </p>
+          </motion.div>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {DEMO_LOGINS.map((d) => (
+              <motion.div key={d.slug} {...fadeUp}>
+                <Card className="flex h-full flex-col rounded-2xl shadow-card">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">{d.role}</CardTitle>
+                    <p className="font-mono text-xs text-muted-foreground">{d.email}</p>
+                    <p className="font-mono text-xs text-muted-foreground">Password: <span className="font-bold text-foreground">{d.password}</span></p>
+                  </CardHeader>
+                  <CardContent className="flex flex-1 flex-col gap-3 text-sm text-muted-foreground">
+                    <p className="flex-1">{d.see}</p>
+                    <Button asChild size="sm" className="w-fit">
+                      <Link href={`/login/${d.slug}`}>Sign in as {d.role} <ArrowRight className="ml-1.5 h-3.5 w-3.5" /></Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
