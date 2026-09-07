@@ -26,6 +26,7 @@ import {
   Siren,
 } from "lucide-react";
 import { useHospitalSettings } from "@/hooks/useHospitalSettings";
+import { SafeImage } from "@/components/shared/SafeImage";
 
 interface PublicDepartment {
   id: string;
@@ -71,6 +72,17 @@ const HOW_IT_WORKS = [
   { icon: TicketCheck, title: "Take a token", desc: "Get your OPD token at reception in under a minute." },
   { icon: Stethoscope, title: "See your doctor", desc: "Walk in when your token is called — on time, every time." },
   { icon: Pill, title: "Reports & medicines", desc: "Collect diagnostics and prescriptions in the same building." },
+];
+
+const GALLERY = [
+  { src: "/images/pediatric-care.jpg", alt: "Pediatrician caring for a small child", caption: "Gentle pediatric care" },
+  { src: "/images/newborn-care.jpg", alt: "Mother holding her newborn with a nurse", caption: "Safe beginnings" },
+  { src: "/images/doctor-consult.jpg", alt: "Doctor consulting a patient in the OPD", caption: "Unhurried consults" },
+  { src: "/images/family-waiting.jpg", alt: "Family relaxing in a bright waiting lounge", caption: "Calm spaces" },
+  { src: "/images/modern-lab.jpg", alt: "Technician working in a modern diagnostics lab", caption: "In-house diagnostics" },
+  { src: "/images/surgery-care.jpg", alt: "Surgical team in a modern operation theatre", caption: "Skilled surgery" },
+  { src: "/images/pharmacy-counter.jpg", alt: "Pharmacist handing medicines to a patient", caption: "On-site pharmacy" },
+  { src: "/images/icu-care.jpg", alt: "Nurse monitoring a patient in the ICU", caption: "Round-the-clock ICU" },
 ];
 
 const TESTIMONIALS = [
@@ -219,6 +231,13 @@ export default function LandingPage() {
             </div>
           </motion.div>
           <motion.div {...fadeUp} className="grid content-center gap-4">
+            <div className="overflow-hidden rounded-2xl border border-white/10 shadow-card">
+              <SafeImage
+                src="/images/hero-care-team.jpg"
+                alt="Doctor and nurse smiling with a patient in a bright hospital corridor"
+                className="aspect-[16/9] w-full"
+              />
+            </div>
             <div className="grid grid-cols-3 gap-4">
               <Card className="border-white/10 bg-white/5 text-center text-white">
                 <CardContent className="p-4">
@@ -347,8 +366,34 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Why us */}
+      {/* Inside CarePlus — real moments, real wards */}
       <section className="border-y border-border bg-white">
+        <div className="mx-auto w-full max-w-6xl px-4 py-14">
+          <motion.div {...fadeUp}>
+            <h2 className="text-2xl font-bold text-navy">Inside CarePlus</h2>
+            <p className="mt-1 text-sm text-muted-foreground">The people and places behind the care.</p>
+          </motion.div>
+          <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+            {GALLERY.map((g) => (
+              <motion.figure key={g.src} {...fadeUp} className="group overflow-hidden rounded-2xl shadow-card">
+                <div className="overflow-hidden">
+                  <SafeImage
+                    src={g.src}
+                    alt={g.alt}
+                    className="aspect-[4/3] w-full transition-transform duration-300 group-hover:scale-105"
+                  />
+                </div>
+                <figcaption className="bg-white px-3 py-2 text-xs font-medium text-muted-foreground">
+                  {g.caption}
+                </figcaption>
+              </motion.figure>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Why us */}
+      <section>
         <div className="mx-auto w-full max-w-6xl px-4 py-14">
           <motion.div {...fadeUp}>
             <h2 className="text-2xl font-bold text-navy">Why choose CarePlus</h2>
@@ -397,32 +442,43 @@ export default function LandingPage() {
 
       {/* Visit band */}
       <section id="visit" className="scroll-mt-20 bg-clinical text-white">
-        <div className="mx-auto flex w-full max-w-6xl flex-col items-start gap-4 px-4 py-12 md:flex-row md:items-center">
-          <span className="rounded-xl bg-white/15 p-3">
-            <ClipboardCheck className="h-6 w-6 text-accent" />
-          </span>
-          <div className="flex-1">
-            <h2 className="text-2xl font-bold">Planning a visit?</h2>
-            <p className="mt-1 flex items-center gap-2 text-sm text-white/80">
+        <div className="mx-auto grid w-full max-w-6xl items-center gap-6 px-4 py-12 md:grid-cols-[1fr_320px]">
+          <div className="overflow-hidden rounded-2xl border border-white/15 shadow-card md:order-2">
+            <SafeImage
+              src="/images/emergency-team.jpg"
+              alt="Emergency entrance with ambulance and response team"
+              className="aspect-[16/10] w-full"
+            />
+          </div>
+          <div className="grid gap-4 md:order-1">
+            <span className="flex items-center gap-3">
+              <span className="rounded-xl bg-white/15 p-3">
+                <ClipboardCheck className="h-6 w-6 text-accent" />
+              </span>
+              <h2 className="text-2xl font-bold">Planning a visit?</h2>
+            </span>
+            <p className="flex items-center gap-2 text-sm text-white/80">
               <Clock className="h-4 w-4 shrink-0 text-accent" />
               {settings.opdHoursNote}
             </p>
             {settings.address && (
-              <p className="mt-1 flex items-center gap-2 text-sm text-white/80">
+              <p className="flex items-center gap-2 text-sm text-white/80">
                 <MapPin className="h-4 w-4 shrink-0 text-accent" />
                 {settings.address}
               </p>
             )}
+            <div>
+              {hasPhone ? (
+                <Button asChild size="lg" className="bg-accent font-semibold text-navy hover:bg-accent/90">
+                  <a href={`tel:${settings.contactPhoneHref}`}><Phone className="mr-1.5 h-4 w-4" />Call {settings.contactPhone}</a>
+                </Button>
+              ) : (
+                <Button asChild size="lg" className="bg-accent font-semibold text-navy hover:bg-accent/90">
+                  <a href="#departments">Explore departments <ArrowRight className="ml-1.5 h-4 w-4" /></a>
+                </Button>
+              )}
+            </div>
           </div>
-          {hasPhone ? (
-            <Button asChild size="lg" className="bg-accent font-semibold text-navy hover:bg-accent/90">
-              <a href={`tel:${settings.contactPhoneHref}`}><Phone className="mr-1.5 h-4 w-4" />Call {settings.contactPhone}</a>
-            </Button>
-          ) : (
-            <Button asChild size="lg" className="bg-accent font-semibold text-navy hover:bg-accent/90">
-              <a href="#departments">Explore departments <ArrowRight className="ml-1.5 h-4 w-4" /></a>
-            </Button>
-          )}
         </div>
       </section>
 
