@@ -41,7 +41,9 @@ const statusSchema = z.object({
 });
 
 const TRANSITIONS: Record<string, string[]> = {
-  Waiting: ["In Triage", "Cancelled"],
+  // Doctors may pull straight from the waiting queue (direct consult) or
+  // receive patients via triage — both are legitimate clinical flows.
+  Waiting: ["In Triage", "With Doctor", "Cancelled"],
   "In Triage": ["With Doctor", "Cancelled"],
   "With Doctor": ["Completed", "Cancelled"],
   Completed: [],

@@ -71,7 +71,7 @@ export default function DoctorDeskPage() {
                     <StatusBadge status={a.status} />
                   </TableCell>
                   <TableCell>
-                    {a.status === "In Triage" && (
+                    {(a.status === "In Triage" || a.status === "Waiting") && (
                       <Button
                         size="sm"
                         variant="outline"
