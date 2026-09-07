@@ -1,0 +1,2 @@
+Static assets for the CarePlus web app (favicons, images, manifests).
+This folder must exist — the production Dockerfile copies it.
