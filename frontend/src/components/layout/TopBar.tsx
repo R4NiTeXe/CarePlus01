@@ -244,7 +244,7 @@ export function TopBar({ onMenu }: { onMenu: () => void }) {
               <kbd className="ml-auto hidden rounded bg-muted px-1.5 font-mono text-[11px] lg:inline-flex">Ctrl K</kbd>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-[380px] p-0" sideOffset={8} align="start">
+          <PopoverContent className="w-[380px] max-w-[calc(100vw-2rem)] p-0" sideOffset={8} align="start">
             <Command shouldFilter={false}>
               <CommandInput
                 ref={searchRef}
@@ -314,7 +314,7 @@ export function TopBar({ onMenu }: { onMenu: () => void }) {
                 {unreadCount > 0 && <span className="absolute right-1.5 top-1.5 h-2 w-2 animate-pulse rounded-full bg-red-500" />}
               </Button>
           </PopoverTrigger>
-          <PopoverContent side="bottom" align="end" className="w-96 p-0">
+          <PopoverContent side="bottom" align="end" className="w-96 max-w-[calc(100vw-2rem)] p-0">
             <div className="flex items-center justify-between border-b p-4">
               <h4 className="font-semibold">Notifications</h4>
               <Button variant="ghost" size="sm" onClick={() => setNotifRead(true)}>

@@ -124,7 +124,7 @@ export default function LabPage() {
           <DialogHeader><DialogTitle>Enter results — {entry?.testName}</DialogTitle></DialogHeader>
           <div className="grid gap-2">
             {draft.map((d, i) => (
-              <div key={i} className="grid grid-cols-4 gap-2">
+              <div key={i} className="grid grid-cols-2 gap-2 lg:grid-cols-4">
                 <Input placeholder="Parameter" value={d.parameter} onChange={(e) => setDraft((p) => p.map((x, j) => j === i ? { ...x, parameter: e.target.value } : x))} aria-label="Parameter" />
                 <Input placeholder="Value" value={d.value} onChange={(e) => setDraft((p) => p.map((x, j) => j === i ? { ...x, value: e.target.value } : x))} aria-label="Value" />
                 <Input placeholder="Unit" value={d.unit} onChange={(e) => setDraft((p) => p.map((x, j) => j === i ? { ...x, unit: e.target.value } : x))} aria-label="Unit" />

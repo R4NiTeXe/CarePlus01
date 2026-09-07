@@ -66,7 +66,7 @@ export function CreateInvoiceModal({ open, onClose }: { open: boolean; onClose: 
               {patients.map((p) => <option key={p.id} value={p.id}>{p.fullName} ({p.id})</option>)}
             </select>
           </label>
-          <div className="grid grid-cols-[1fr_110px_110px_auto] items-end gap-2">
+          <div className="grid grid-cols-2 items-end gap-2 sm:grid-cols-[1fr_110px_110px_auto]">
             <label className="grid gap-1 text-sm">Item<Input value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Consultation" /></label>
             <label className="grid gap-1 text-sm">Dept
               <select value={dept} onChange={(e) => setDept(e.target.value)} className="rounded-lg border border-input bg-background px-2 py-2">

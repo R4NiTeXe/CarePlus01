@@ -1,12 +1,21 @@
 name: CI
 
+# Delivery model: Vercel auto-deploys `frontend/` and Render auto-deploys
+# `backend/` on every push to main. This workflow is the quality gate in
+# front of both — nothing merges or deploys unless every step below passes.
+
 on:
   push:
   pull_request:
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   checks:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       mongo:
         image: mongo:7
@@ -44,6 +53,13 @@ jobs:
 
       - name: Test backend
         run: npm run test -w @careplus/backend
+
+      # Advisory only: surfaces new CVEs in the log without failing the
+      # build on pre-existing moderate advisories. Promote to a hard gate
+      # (remove continue-on-error) once the baseline is clean.
+      - name: Dependency audit
+        run: npm audit --omit=dev --audit-level=high
+        continue-on-error: true
 
       - name: Build
         run: npm run build
