@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { KpiCard } from "@/components/shared/KpiCard";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { StatusBadge } from "@/components/shared/StatusBadge";
 import { useCollectPayment, useInvoices } from "@/hooks/useBilling";
 import { useAppSelector } from "@/store/hooks";
 import { Wallet, HandCoins, Hourglass } from "lucide-react";

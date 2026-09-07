@@ -25,10 +25,13 @@
   },
   "devDependencies": {
     "concurrently": "^9.1.2",
-    "eslint": "^9.39.5",
+    "eslint": "^10.10.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.4.1",
     "prettier": "^3.9.6"
+  },
+  "overrides": {
+    "eslint": "^10.10.0"
   },
   "lint-staged": {
     "backend/**/*.{ts,js,cjs,mjs,json,md}": [

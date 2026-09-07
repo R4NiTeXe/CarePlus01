@@ -86,6 +86,7 @@ const config: Config = {
       },
     },
   },
+  // eslint-disable-next-line @typescript-eslint/no-require-imports -- tailwind v3 plugin API is require-based
   plugins: [require("tailwindcss-animate")],
 };
 

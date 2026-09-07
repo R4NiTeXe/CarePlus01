@@ -36,7 +36,8 @@ export function SafeImage({
   }
 
   return (
-    // eslint-disable-next-line @next/next/no-img-element
+    // Plain <img> is intentional: graceful onError fallback for optional
+    // marketing photos that may not exist yet.
     <img
       src={src}
       alt={alt}
