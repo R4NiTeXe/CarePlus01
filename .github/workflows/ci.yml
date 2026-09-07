@@ -115,11 +115,12 @@ jobs:
           diff -u docs/openapi.snapshot.json.canon /tmp/live.json.canon || (echo "::error::OpenAPI contract changed — regenerate the snapshot against a running API and commit" && kill $API_PID && exit 1)
           kill $API_PID || true
 
-  # Advisory only: surfaces new CVEs without failing the build.
+  # Hard gate at critical level. Highs/moderates below are tracked with
+  # written justification in SECURITY.md (accepted-risk log) instead of
+  # failing every build on unfixable-without-breaking findings.
   audit:
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -127,7 +128,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm audit --omit=dev --audit-level=high
+      - run: npm audit --omit=dev --audit-level=critical
 
   # ✅/❌ scoreboard printed on every run — the symbol summary you asked for.
   report:
