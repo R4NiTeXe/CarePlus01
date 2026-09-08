@@ -17,7 +17,7 @@ export function Pager({
 }) {
   if (pages <= 1) return null;
   return (
-    <div className="flex items-center justify-between gap-3 px-1 py-3 text-sm">
+    <div className="flex flex-wrap items-center justify-between gap-3 px-1 py-3 text-sm">
       <p className="text-muted-foreground">
         Page {page} of {pages} • {total} records
       </p>

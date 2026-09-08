@@ -27,6 +27,7 @@ import {
   Siren,
   Sun,
   Moon,
+  Menu,
 } from "lucide-react";
 import { useHospitalSettings } from "@/hooks/useHospitalSettings";
 import { SafeImage } from "@/components/shared/SafeImage";
@@ -205,6 +206,17 @@ export default function LandingPage() {
           <a href="#departments" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground sm:block">Departments</a>
           <a href="#doctors" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground sm:block">Doctors</a>
           <a href="#visit" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground sm:block">Visit</a>
+          <details className="relative sm:hidden">
+            <summary className="flex h-10 w-10 list-none items-center justify-center rounded-md hover:bg-muted [&::-webkit-details-marker]:hidden" aria-label="Open menu">
+              <Menu className="h-5 w-5" />
+            </summary>
+            <nav className="absolute right-0 top-12 z-40 grid w-44 gap-1 rounded-xl border bg-card p-2 shadow-card">
+              <a href="#departments" className="rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted">Departments</a>
+              <a href="#doctors" className="rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted">Doctors</a>
+              <a href="#visit" className="rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted">Visit</a>
+              <a href="#demo" className="rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted">Live demo</a>
+            </nav>
+          </details>
           <Button
             variant="ghost"
             size="icon"
@@ -524,7 +536,7 @@ export default function LandingPage() {
       </section>
 
       {/* Live demo access — interviewers explore every desk with one click */}
-      <section className="border-y border-border bg-white">
+      <section id="demo" className="scroll-mt-20 border-y border-border bg-card">
         <div className="mx-auto w-full max-w-6xl px-4 py-14">
           <motion.div {...fadeUp}>
             <p className="text-xs font-bold uppercase tracking-widest text-clinical dark:text-[#7FD8BE]">Live demo</p>
