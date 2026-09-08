@@ -121,10 +121,10 @@ export default function SettingsPage() {
             </label>
             <div className="grid grid-cols-2 gap-3">
               <label className="grid gap-1 text-sm">Public contact number
-                <Input value={phone} placeholder="e.g. +1 (987) 765 4320" onChange={(e) => { setPhone(e.target.value); markDirty(); }} />
+                <Input value={phone} placeholder="e.g. 1234567890" onChange={(e) => { setPhone(e.target.value); markDirty(); }} />
               </label>
               <label className="grid gap-1 text-sm">Dial code (digits)
-                <Input value={phoneHref} placeholder="e.g. 19877654320" onChange={(e) => { setPhoneHref(e.target.value.replace(/[^\d+]/g, "")); markDirty(); }} />
+                <Input value={phoneHref} placeholder="e.g. 1234567890" onChange={(e) => { setPhoneHref(e.target.value.replace(/[^\d+]/g, "")); markDirty(); }} />
               </label>
             </div>
             <label className="grid gap-1 text-sm">Public address

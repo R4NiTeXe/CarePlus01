@@ -175,8 +175,8 @@ async function main(): Promise<void> {
       $setOnInsert: {
         key: "hospital",
         hospitalName: "CarePlus Multi-Speciality Hospital",
-        contactPhone: "+91 98765 43210",
-        contactPhoneHref: "919876543210",
+        contactPhone: "1234567890",
+        contactPhoneHref: "1234567890",
         address: "12 MG Road, Medical District",
         opdHoursNote: "OPD Mon–Sat, 9 AM – 5 PM • Emergency wing never closes",
         slotMinutes: 30,
