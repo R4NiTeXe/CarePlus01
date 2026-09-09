@@ -1,55 +1,140 @@
+networks:
+  careplus_net:
+    driver: bridge
+
+volumes:
+  mongo_data:
+
 services:
   mongo:
     image: mongo:7
     restart: unless-stopped
-    ports:
-      - "27017:27017"
+    networks:
+      - careplus_net
+    environment:
+      MONGO_INITDB_DATABASE: careplus
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:?MONGO_ROOT_USER must be set}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?MONGO_ROOT_PASSWORD must be set}
     volumes:
       - mongo_data:/data/db
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 10s
       timeout: 5s
+      start_period: 15s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   api:
     build:
       context: .
       dockerfile: backend/Dockerfile
     restart: unless-stopped
-    ports:
-      - "4000:4000"
+    networks:
+      - careplus_net
+    env_file:
+      - backend/.env
     environment:
-      PORT: 4000
+      PORT: "4000"
       NODE_ENV: production
-      FRONTEND_URL: http://localhost:3000
-      MONGODB_URI: mongodb://mongo:27017/careplus
-      # No default: compose refuses to start without real secrets, so a deploy
-      # can never sign tokens with a publicly known key. Generate with:
-      #   node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
-      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET and JWT_ACCESS_SECRET before deploying}
-      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?Set JWT_SECRET and JWT_ACCESS_SECRET before deploying}
-      JWT_EXPIRES_IN: 30m
-      JWT_REFRESH_EXPIRES_IN: 7d
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER}:${MONGO_ROOT_PASSWORD}@mongo:27017/careplus?authSource=admin
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?JWT_ACCESS_SECRET must be set}
+      JWT_EXPIRES_IN: "15m"
+      JWT_REFRESH_EXPIRES_IN: "7d"
     depends_on:
       mongo:
         condition: service_healthy
-    command: sh -c "node backend/dist/index.js"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   web:
     build:
       context: .
       dockerfile: frontend/Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: http://localhost:4000/api/v1
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost/api/v1}
     restart: unless-stopped
-    ports:
-      - "3000:3000"
+    networks:
+      - careplus_net
+    environment:
+      NODE_ENV: production
     depends_on:
-      - api
+      api:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
-  # Optional: seed on first boot
-  # Run: docker compose run --rm api npm run seed -w @careplus/backend
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    networks:
+      - careplus_net
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      api:
+        condition: service_healthy
+      web:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
-volumes:
-  mongo_data:
+  seed:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    networks:
+      - careplus_net
+    env_file:
+      - backend/.env
+    environment:
+      NODE_ENV: production
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-seed}:${MONGO_ROOT_PASSWORD:-seed}@mongo:27017/careplus?authSource=admin
+      JWT_SECRET: ${JWT_SECRET:-seed-secret}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-seed-access-secret}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    command: ["node", "backend/dist/seed.js"]
+    restart: "no"
+    profiles:
+      - tools
