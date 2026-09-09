@@ -48,14 +48,14 @@ CarePlus is a **production-ready, role-based Hospital Management System** design
 
 **Key capabilities at a glance:**
 
-| Pillar | Detail |
-| --- | --- |
-| **Clinical** | Patient 360 EMR, appointment token queue, 4-stage lab pipeline, bed matrix |
-| **Pharmacy** | FEFO batch drug dispenser with atomic charge posting to billing |
-| **Finance** | Consolidated invoicing, TPA claims, paise-exact totals |
-| **Operations** | 3-shift ward roster, consumables ledger, low-stock alerts |
-| **Governance** | Immutable audit trail, RBAC (6 roles), JWT rotation, rate limiting |
-| **Observability** | Structured Pino logs, `/health` liveness, `/ready` readiness, Swagger UI |
+| Pillar            | Detail                                                                     |
+| ----------------- | -------------------------------------------------------------------------- |
+| **Clinical**      | Patient 360 EMR, appointment token queue, 4-stage lab pipeline, bed matrix |
+| **Pharmacy**      | FEFO batch drug dispenser with atomic charge posting to billing            |
+| **Finance**       | Consolidated invoicing, TPA claims, paise-exact totals                     |
+| **Operations**    | 3-shift ward roster, consumables ledger, low-stock alerts                  |
+| **Governance**    | Immutable audit trail, RBAC (6 roles), JWT rotation, rate limiting         |
+| **Observability** | Structured Pino logs, `/health` liveness, `/ready` readiness, Swagger UI   |
 
 ---
 
@@ -88,34 +88,34 @@ The stack runs as **four Docker services** on a shared bridge network (`careplus
 
 ### Frontend — `@careplus/frontend`
 
-| Layer | Technology |
-| --- | --- |
-| **Framework** | Next.js 15 (App Router, Turbopack, RSC) |
-| **Language** | TypeScript 5.7 — strict, zero `any` |
-| **UI System** | shadcn/ui · Radix UI primitives · Tailwind CSS 3 |
-| **Forms** | React Hook Form 7 + Zod schemas |
-| **Server State** | TanStack Query 5 (caching, optimistic mutations) |
-| **Data Grids** | TanStack Table 8 (virtualized, sortable, filterable) |
-| **Client State** | Redux Toolkit 2 (auth slice, ops) |
-| **Real-time** | Liveblocks 2 (clinical presence, live bed board sync) |
-| **Animations** | Motion 12 (page transitions, micro-interactions) |
-| **HTTP Client** | Axios with JWT refresh interceptor |
-| **E2E Testing** | Cypress 13 |
-| **Scroll** | Lenis (smooth scroll over dense medical timelines) |
+| Layer            | Technology                                            |
+| ---------------- | ----------------------------------------------------- |
+| **Framework**    | Next.js 15 (App Router, Turbopack, RSC)               |
+| **Language**     | TypeScript 5.7 — strict, zero `any`                   |
+| **UI System**    | shadcn/ui · Radix UI primitives · Tailwind CSS 3      |
+| **Forms**        | React Hook Form 7 + Zod schemas                       |
+| **Server State** | TanStack Query 5 (caching, optimistic mutations)      |
+| **Data Grids**   | TanStack Table 8 (virtualized, sortable, filterable)  |
+| **Client State** | Redux Toolkit 2 (auth slice, ops)                     |
+| **Real-time**    | Liveblocks 2 (clinical presence, live bed board sync) |
+| **Animations**   | Motion 12 (page transitions, micro-interactions)      |
+| **HTTP Client**  | Axios with JWT refresh interceptor                    |
+| **E2E Testing**  | Cypress 13                                            |
+| **Scroll**       | Lenis (smooth scroll over dense medical timelines)    |
 
 ### Backend — `@careplus/backend`
 
-| Layer | Technology |
-| --- | --- |
-| **Framework** | Express 4 + TypeScript 5.7 |
-| **Database** | MongoDB 7 via Mongoose 9 |
-| **Auth** | JSON Web Tokens (access 15 m / refresh 7 d, httpOnly cookie rotation) |
-| **Validation** | Zod at every API boundary |
-| **Security** | Helmet, CORS allowlist, express-rate-limit, bcryptjs |
-| **API Docs** | Swagger UI · frozen OpenAPI 3.1 snapshot |
-| **Logging** | Pino (structured JSON) + Morgan HTTP logs |
-| **Testing** | Vitest 5 + Supertest + mongodb-memory-server |
-| **Process** | tsx (dev watch) -> tsc -> node dist/ (prod) |
+| Layer          | Technology                                                            |
+| -------------- | --------------------------------------------------------------------- |
+| **Framework**  | Express 4 + TypeScript 5.7                                            |
+| **Database**   | MongoDB 7 via Mongoose 9                                              |
+| **Auth**       | JSON Web Tokens (access 15 m / refresh 7 d, httpOnly cookie rotation) |
+| **Validation** | Zod at every API boundary                                             |
+| **Security**   | Helmet, CORS allowlist, express-rate-limit, bcryptjs                  |
+| **API Docs**   | Swagger UI · frozen OpenAPI 3.1 snapshot                              |
+| **Logging**    | Pino (structured JSON) + Morgan HTTP logs                             |
+| **Testing**    | Vitest 5 + Supertest + mongodb-memory-server                          |
+| **Process**    | tsx (dev watch) -> tsc -> node dist/ (prod)                           |
 
 ---
 
@@ -262,28 +262,28 @@ Hospital profile management, role-based permission configuration, and an immutab
 { "error": { "code": "UNAUTHORIZED", "message": "...", "details": null, "requestId": "uuid" } }
 ```
 
-| Method | Route | Auth | Notes |
-| --- | --- | --- | --- |
-| `GET` | `/health` | — | Liveness probe — always 200 if process is alive |
-| `GET` | `/ready` | — | Readiness probe — 503 when MongoDB is disconnected |
-| `GET` | `/docs` | — | Swagger UI |
-| `GET` | `/api/v1/openapi.json` | — | Frozen OpenAPI 3.1 contract |
-| `POST` | `/api/v1/auth/login` | — | `{email, password}` -> `{token, refreshToken, role, name}` |
-| `POST` | `/api/v1/auth/refresh` | — | Rotates token pair; sets httpOnly refresh cookie |
-| `POST` | `/api/v1/auth/logout` | — | Revokes refresh token |
-| `GET / POST` | `/api/v1/patients` | JWT / Admin, Nurse | Paginated with filters |
-| `GET` | `/api/v1/patients/:id` | JWT | Full patient record incl. visits, lab orders, bills |
-| `GET / POST / PATCH` | `/api/v1/appointments` | JWT / roles | Guarded status machine |
-| `GET / PATCH` | `/api/v1/beds` | JWT / roles | Admit, transfer, release + occupancy |
-| `GET / POST` | `/api/v1/pharmacy` | JWT / roles | Atomic dispense; posts charge to billing |
-| `GET / POST / PATCH` | `/api/v1/lab` | JWT / roles | Forward-only 4-stage pipeline |
-| `GET / POST` | `/api/v1/billing` | JWT / Admin, Cashier | Paise-exact totals; atomic collect |
-| `GET` | `/api/v1/doctors` | JWT | Paginated |
-| `GET` | `/api/v1/departments` | JWT | Paginated |
-| `GET` | `/api/v1/inventory` | JWT | Paginated |
-| `GET` | `/api/v1/staff` | JWT | Paginated |
-| `GET` | `/api/v1/audit` | JWT / Admin | Paginated immutable log |
-| `GET` | `/api/v1/dashboard/stats` | JWT | Aggregated KPI snapshot |
+| Method               | Route                     | Auth                 | Notes                                                      |
+| -------------------- | ------------------------- | -------------------- | ---------------------------------------------------------- |
+| `GET`                | `/health`                 | —                    | Liveness probe — always 200 if process is alive            |
+| `GET`                | `/ready`                  | —                    | Readiness probe — 503 when MongoDB is disconnected         |
+| `GET`                | `/docs`                   | —                    | Swagger UI                                                 |
+| `GET`                | `/api/v1/openapi.json`    | —                    | Frozen OpenAPI 3.1 contract                                |
+| `POST`               | `/api/v1/auth/login`      | —                    | `{email, password}` -> `{token, refreshToken, role, name}` |
+| `POST`               | `/api/v1/auth/refresh`    | —                    | Rotates token pair; sets httpOnly refresh cookie           |
+| `POST`               | `/api/v1/auth/logout`     | —                    | Revokes refresh token                                      |
+| `GET / POST`         | `/api/v1/patients`        | JWT / Admin, Nurse   | Paginated with filters                                     |
+| `GET`                | `/api/v1/patients/:id`    | JWT                  | Full patient record incl. visits, lab orders, bills        |
+| `GET / POST / PATCH` | `/api/v1/appointments`    | JWT / roles          | Guarded status machine                                     |
+| `GET / PATCH`        | `/api/v1/beds`            | JWT / roles          | Admit, transfer, release + occupancy                       |
+| `GET / POST`         | `/api/v1/pharmacy`        | JWT / roles          | Atomic dispense; posts charge to billing                   |
+| `GET / POST / PATCH` | `/api/v1/lab`             | JWT / roles          | Forward-only 4-stage pipeline                              |
+| `GET / POST`         | `/api/v1/billing`         | JWT / Admin, Cashier | Paise-exact totals; atomic collect                         |
+| `GET`                | `/api/v1/doctors`         | JWT                  | Paginated                                                  |
+| `GET`                | `/api/v1/departments`     | JWT                  | Paginated                                                  |
+| `GET`                | `/api/v1/inventory`       | JWT                  | Paginated                                                  |
+| `GET`                | `/api/v1/staff`           | JWT                  | Paginated                                                  |
+| `GET`                | `/api/v1/audit`           | JWT / Admin          | Paginated immutable log                                    |
+| `GET`                | `/api/v1/dashboard/stats` | JWT                  | Aggregated KPI snapshot                                    |
 
 Full contract: [`docs/API_CONTRACT.md`](docs/API_CONTRACT.md)  
 Live interactive docs: `http://localhost:4000/docs`
@@ -339,29 +339,29 @@ npm run dev:frontend
 
 ### Root-Level Scripts
 
-| Script | Description |
-| --- | --- |
-| `npm run dev` | Start frontend and backend concurrently |
-| `npm run dev:frontend` | Frontend only (port 3000, Turbopack HMR) |
-| `npm run dev:backend` | Backend only (port 4000, tsx watch) |
-| `npm run build` | Production build — both workspaces |
-| `npm run build:frontend` | Production build — frontend only |
-| `npm run build:backend` | Production build — backend only |
-| `npm run typecheck` | `tsc --noEmit` in both workspaces |
-| `npm run format` | Auto-format all files with Prettier |
-| `npm run format:check` | Verify formatting without writing |
-| `npm run lint` | ESLint on the backend workspace |
+| Script                   | Description                              |
+| ------------------------ | ---------------------------------------- |
+| `npm run dev`            | Start frontend and backend concurrently  |
+| `npm run dev:frontend`   | Frontend only (port 3000, Turbopack HMR) |
+| `npm run dev:backend`    | Backend only (port 4000, tsx watch)      |
+| `npm run build`          | Production build — both workspaces       |
+| `npm run build:frontend` | Production build — frontend only         |
+| `npm run build:backend`  | Production build — backend only          |
+| `npm run typecheck`      | `tsc --noEmit` in both workspaces        |
+| `npm run format`         | Auto-format all files with Prettier      |
+| `npm run format:check`   | Verify formatting without writing        |
+| `npm run lint`           | ESLint on the backend workspace          |
 
 ### Service URLs
 
-| Service | URL |
-| --- | --- |
-| **Frontend** | `http://localhost:3000` |
-| **REST API** | `http://localhost:4000/api/v1` |
-| **Swagger UI** | `http://localhost:4000/docs` |
+| Service          | URL                                         |
+| ---------------- | ------------------------------------------- |
+| **Frontend**     | `http://localhost:3000`                     |
+| **REST API**     | `http://localhost:4000/api/v1`              |
+| **Swagger UI**   | `http://localhost:4000/docs`                |
 | **OpenAPI JSON** | `http://localhost:4000/api/v1/openapi.json` |
-| **Liveness** | `http://localhost:4000/health` |
-| **Readiness** | `http://localhost:4000/ready` |
+| **Liveness**     | `http://localhost:4000/health`              |
+| **Readiness**    | `http://localhost:4000/ready`               |
 
 ---
 
@@ -369,26 +369,26 @@ npm run dev:frontend
 
 ### Backend — `backend/.env`
 
-| Variable | Required | Default | Description |
-| --- | --- | --- | --- |
-| `PORT` | No | `4000` | HTTP server port |
-| `NODE_ENV` | No | `development` | Runtime environment |
-| `MONGODB_URI` | Yes | — | Full MongoDB connection string |
-| `MONGO_ROOT_USER` | Yes (Docker) | — | MongoDB admin username |
-| `MONGO_ROOT_PASSWORD` | Yes (Docker) | — | MongoDB admin password |
-| `JWT_SECRET` | Yes | — | HMAC signing secret (min 32 chars) |
-| `JWT_ACCESS_SECRET` | Yes | — | Access token signing secret (min 32 chars) |
-| `JWT_EXPIRES_IN` | No | `15m` | Access token TTL |
-| `JWT_REFRESH_EXPIRES_IN` | No | `7d` | Refresh token TTL |
-| `FRONTEND_URL` | No | `http://localhost` | CORS allowlist origin |
+| Variable                 | Required     | Default            | Description                                |
+| ------------------------ | ------------ | ------------------ | ------------------------------------------ |
+| `PORT`                   | No           | `4000`             | HTTP server port                           |
+| `NODE_ENV`               | No           | `development`      | Runtime environment                        |
+| `MONGODB_URI`            | Yes          | —                  | Full MongoDB connection string             |
+| `MONGO_ROOT_USER`        | Yes (Docker) | —                  | MongoDB admin username                     |
+| `MONGO_ROOT_PASSWORD`    | Yes (Docker) | —                  | MongoDB admin password                     |
+| `JWT_SECRET`             | Yes          | —                  | HMAC signing secret (min 32 chars)         |
+| `JWT_ACCESS_SECRET`      | Yes          | —                  | Access token signing secret (min 32 chars) |
+| `JWT_EXPIRES_IN`         | No           | `15m`              | Access token TTL                           |
+| `JWT_REFRESH_EXPIRES_IN` | No           | `7d`               | Refresh token TTL                          |
+| `FRONTEND_URL`           | No           | `http://localhost` | CORS allowlist origin                      |
 
 > **Fail-fast design:** The server exits at startup (`exit 1`) if `JWT_SECRET` or `JWT_ACCESS_SECRET` are absent or shorter than 32 characters. Docker Compose also refuses to start without these variables being explicitly set.
 
 ### Frontend — `frontend/.env.local`
 
-| Variable | Required | Description |
-| --- | --- | --- |
-| `NEXT_PUBLIC_API_URL` | Yes | Backend base URL, e.g. `http://localhost:4000/api/v1` |
+| Variable              | Required | Description                                           |
+| --------------------- | -------- | ----------------------------------------------------- |
+| `NEXT_PUBLIC_API_URL` | Yes      | Backend base URL, e.g. `http://localhost:4000/api/v1` |
 
 ---
 
@@ -416,13 +416,13 @@ docker compose down -v
 
 ### Service Map
 
-| Service | Image | Exposed Port | Resource Limit |
-| --- | --- | --- | --- |
-| `nginx` | nginx:1.27-alpine | `80`, `443` | 0.5 CPU / 128 MB |
-| `web` | Custom (frontend/Dockerfile) | Internal | 1.0 CPU / 512 MB |
-| `api` | Custom (backend/Dockerfile) | Internal | 1.0 CPU / 512 MB |
-| `mongo` | mongo:7 | Internal | 1.0 CPU / 512 MB |
-| `seed` | Reuses api image | — | Tools profile only |
+| Service | Image                        | Exposed Port | Resource Limit     |
+| ------- | ---------------------------- | ------------ | ------------------ |
+| `nginx` | nginx:1.27-alpine            | `80`, `443`  | 0.5 CPU / 128 MB   |
+| `web`   | Custom (frontend/Dockerfile) | Internal     | 1.0 CPU / 512 MB   |
+| `api`   | Custom (backend/Dockerfile)  | Internal     | 1.0 CPU / 512 MB   |
+| `mongo` | mongo:7                      | Internal     | 1.0 CPU / 512 MB   |
+| `seed`  | Reuses api image             | —            | Tools profile only |
 
 **Startup dependency chain:**
 `mongo` (mongosh ping health check) -> `api` -> `web` -> `nginx`
@@ -443,16 +443,16 @@ npm run test -w @careplus/backend
 npx vitest run tests/auth.test.ts
 ```
 
-| Suite | Coverage Area |
-| --- | --- |
-| `auth.test.ts` | Login, refresh, logout, token rotation, rate-limit bypass in test env |
-| `patients.test.ts` | Patient CRUD, pagination, role guards |
-| `appointments.test.ts` | Token queue, status-machine transitions |
-| `pharmacy-lab.test.ts` | Drug dispense, lab pipeline stage advancement |
-| `billing-pagination.test.ts` | Invoice creation, atomic collect, cursor pagination |
-| `enterprise.test.ts` | Cross-module workflows, audit trail integrity |
-| `health.test.ts` | Liveness and readiness probes |
-| `settings.test.ts` | Hospital profile, RBAC configuration |
+| Suite                        | Coverage Area                                                         |
+| ---------------------------- | --------------------------------------------------------------------- |
+| `auth.test.ts`               | Login, refresh, logout, token rotation, rate-limit bypass in test env |
+| `patients.test.ts`           | Patient CRUD, pagination, role guards                                 |
+| `appointments.test.ts`       | Token queue, status-machine transitions                               |
+| `pharmacy-lab.test.ts`       | Drug dispense, lab pipeline stage advancement                         |
+| `billing-pagination.test.ts` | Invoice creation, atomic collect, cursor pagination                   |
+| `enterprise.test.ts`         | Cross-module workflows, audit trail integrity                         |
+| `health.test.ts`             | Liveness and readiness probes                                         |
+| `settings.test.ts`           | Hospital profile, RBAC configuration                                  |
 
 ### Frontend — E2E Tests (Cypress)
 
@@ -470,18 +470,18 @@ npm run cypress:run -w @careplus/frontend
 
 CarePlus applies a **defense-in-depth** approach across the full stack:
 
-| Control | Implementation |
-| --- | --- |
-| **JWT rotation** | Short-lived access tokens (15 min) + httpOnly refresh tokens (7 d); multi-secret rotation via config array |
-| **RBAC** | 6 roles enforced at every protected route via `requireRole()` middleware; Admins pass all role checks |
-| **Rate limiting** | Credential endpoints: 20 req / 15 min; token refresh: 180 req / 15 min; self-disabled in test env |
-| **NoSQL injection** | Express `query parser` set to `simple` — `?field[$ne]=x` is treated as a literal string, never reaching Mongoose |
-| **Input validation** | Zod schemas parse every request body before it touches the database layer |
-| **Payload limit** | JSON bodies capped at 100 KB |
-| **HTTP hardening** | Helmet (CSP, HSTS, X-Frame-Options, Referrer-Policy, and more) |
-| **Audit trail** | Every mutating authenticated request is asynchronously written to an append-only `Audit` collection; audit writes never block the response |
-| **Secrets** | `.env` files are git-ignored; server fails fast on missing or weak secrets; Docker Compose enforces required vars |
-| **Dependency audit** | CI runs `npm audit --omit=dev --audit-level=critical`; all open risks documented in `SECURITY.md` |
+| Control              | Implementation                                                                                                                             |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| **JWT rotation**     | Short-lived access tokens (15 min) + httpOnly refresh tokens (7 d); multi-secret rotation via config array                                 |
+| **RBAC**             | 6 roles enforced at every protected route via `requireRole()` middleware; Admins pass all role checks                                      |
+| **Rate limiting**    | Credential endpoints: 20 req / 15 min; token refresh: 180 req / 15 min; self-disabled in test env                                          |
+| **NoSQL injection**  | Express `query parser` set to `simple` — `?field[$ne]=x` is treated as a literal string, never reaching Mongoose                           |
+| **Input validation** | Zod schemas parse every request body before it touches the database layer                                                                  |
+| **Payload limit**    | JSON bodies capped at 100 KB                                                                                                               |
+| **HTTP hardening**   | Helmet (CSP, HSTS, X-Frame-Options, Referrer-Policy, and more)                                                                             |
+| **Audit trail**      | Every mutating authenticated request is asynchronously written to an append-only `Audit` collection; audit writes never block the response |
+| **Secrets**          | `.env` files are git-ignored; server fails fast on missing or weak secrets; Docker Compose enforces required vars                          |
+| **Dependency audit** | CI runs `npm audit --omit=dev --audit-level=critical`; all open risks documented in `SECURITY.md`                                          |
 
 Full vulnerability log and accepted-risk register: [`SECURITY.md`](SECURITY.md)
 
@@ -519,17 +519,17 @@ npm run lint           # Lint backend source
 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the full architecture decision record and feature specification.
 
-| Phase | Target | Status |
-| --- | --- | --- |
-| Core HMS modules | All 14 workstations + complete REST API | Complete |
-| Docker production stack | Nginx + TLS + resource limits + health checks | Complete |
-| Backend integration tests | 10 test suites with mongodb-memory-server | Complete |
-| Security hardening | Rate limiting, NoSQL injection guard, RBAC | Complete |
-| Prisma / PostgreSQL migration | Swap Mongoose in-memory store | Planned |
-| Frontend live API integration | Wire TanStack Query to real REST endpoints | Planned |
-| Liveblocks bed board sync | Real-time multi-user clinical presence | Planned |
-| Cypress E2E coverage | Critical clinical workflows end-to-end | Planned |
-| CI/CD pipeline | GitHub Actions -> Docker Hub -> staging | Planned |
+| Phase                         | Target                                        | Status   |
+| ----------------------------- | --------------------------------------------- | -------- |
+| Core HMS modules              | All 14 workstations + complete REST API       | Complete |
+| Docker production stack       | Nginx + TLS + resource limits + health checks | Complete |
+| Backend integration tests     | 10 test suites with mongodb-memory-server     | Complete |
+| Security hardening            | Rate limiting, NoSQL injection guard, RBAC    | Complete |
+| Prisma / PostgreSQL migration | Swap Mongoose in-memory store                 | Planned  |
+| Frontend live API integration | Wire TanStack Query to real REST endpoints    | Planned  |
+| Liveblocks bed board sync     | Real-time multi-user clinical presence        | Planned  |
+| Cypress E2E coverage          | Critical clinical workflows end-to-end        | Planned  |
+| CI/CD pipeline                | GitHub Actions -> Docker Hub -> staging       | Planned  |
 
 ---
 
